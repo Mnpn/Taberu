@@ -14,6 +14,7 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var dateCheck: NSButton!
     
     @IBOutlet weak var versionLabel: NSTextField!
+    @IBOutlet var link: NSTextView!
     
     let df = UserDefaults.standard
     
@@ -29,6 +30,12 @@ class PreferencesViewController: NSViewController {
         let build: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as! String
         versionLabel.stringValue = "Taberu \(version) (build \(build))"
         
+        // https://stackoverflow.com/questions/7055131
+        // poke the automatic link detection.. lol
+        link.isEditable = true
+        link.checkTextInDocument(nil)
+        link.isEditable = false
+
         self.preferredContentSize = NSMakeSize(450, 300)
     }
     
