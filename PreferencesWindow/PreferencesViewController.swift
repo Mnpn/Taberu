@@ -47,6 +47,8 @@ class PreferencesViewController: NSViewController {
         df.set(URLTextField.stringValue, forKey: "feed_url")
         
         let delegate = NSApplication.shared.delegate as! AppDelegate
-        delegate.reload()
+        Task {
+            await delegate.reload()
+        }
     }
 }

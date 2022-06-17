@@ -24,7 +24,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.image = NSImage(systemSymbolName: "arrow.up.arrow.down.square.fill", accessibilityDescription: "Taberu")
         }
         
-        reload()
+        Task { // can't call async from a sync function, so we create a task
+            await reload()
+        }
     }
     
     func fetch(url: URL) {
@@ -97,7 +99,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @objc func cool() {}
     
-    @objc func reload() {
+    // reload() is async to not delay other actions such as closing preferences
+    @objc func reload() async {
         feedEntries = [] // clear current entries
         let url = UserDefaults.standard.string(forKey: "feed_url") // get latest set URL
         currentURL = URL(string: url ?? "")!
