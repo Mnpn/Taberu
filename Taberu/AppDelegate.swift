@@ -18,6 +18,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var feedEntries: [RSSFeedItem] = []
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        // set default UserDefaults if they do not exist
+        UserDefaults.standard.register(
+            defaults: [
+                "feed_url": "",
+                "should_display_title": true,
+                "should_display_description": true,
+                "should_display_date": true
+            ]
+        )
+
         // create a menu bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
