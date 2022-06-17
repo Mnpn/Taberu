@@ -69,7 +69,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if currentURL?.absoluteString == nil || currentURL?.absoluteString == "" {
             menu.addItem(NSMenuItem(title: "No URL provided! Set one in Preferences.", action: nil, keyEquivalent: ""))
         } else {
-            let reload = NSMenuItem(title: "Reload", action: #selector(reload), keyEquivalent: "R")
+            let reload = NSMenuItem(title: "Reload", action: #selector(bakaReload), keyEquivalent: "R")
             menu.addItem(reload)
 
             menu.addItem(NSMenuItem.separator())
@@ -119,7 +119,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         openURL(url: feedEntries[sendingEntry].link ?? "")
     }
 
-    @IBAction func openURL(url: String) {
+    func openURL(url: String) {
         if url == "" { return }
         NSWorkspace.shared.open(URL(string: url)!)
     }
@@ -135,6 +135,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         createMenu() // refresh the menu
     }
     
+    // because calling an async function directly from the #selector causes a general protection fault :D
+    @objc func bakaReload() {
+        Task { await reload() }
+    }
+
     @objc func openPreferences() {
         preferencesWindowController?.showWindow(self)
     }
