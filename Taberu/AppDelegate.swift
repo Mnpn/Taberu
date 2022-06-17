@@ -80,8 +80,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
             for entry in feedEntries {
                 if UserDefaults.standard.bool(forKey: "should_display_title") {
-                    menu.addItem(NSMenuItem(title: entry.title ?? "Unknown title", action: #selector(cool), keyEquivalent: ""))
+                    let titleItem = NSMenuItem(title: "Placeholder", action: #selector(entryClick), keyEquivalent: "")
+                    // set the title to the index of the item in the array. the attributed title will override the
+                    // user-visible NSMenuItem name, but we'll still be able to fetch the "fake index" title later!
+                    titleItem.attributedTitle = NSAttributedString(string: entry.title ?? "Unknown title")
+                    titleItem.title = String(feedEntries.firstIndex(of: entry) ?? -1)
+                    menu.addItem(titleItem)
                 }
+
+                let descItem = NSMenuItem(title: "Placeholder", action: nil, keyEquivalent: "")
     
                 let dDesc = UserDefaults.standard.bool(forKey: "should_display_description")
                 let dDate = UserDefaults.standard.bool(forKey: "should_display_date")
@@ -93,8 +100,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
                 let bottomField = (dDate ? date : "") + ((dDate && dDesc) ? ": " : "") + (dDesc ? desc : "")
                 if bottomField != "" {
-                    menu.addItem(NSMenuItem(title: bottomField, action: nil, keyEquivalent: ""))
+                    descItem.attributedTitle = NSAttributedString(string: bottomField)
                 }
+                menu.addItem(descItem)
     
                 menu.addItem(NSMenuItem.separator())
             }
@@ -104,7 +112,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem.menu = menu
     }
     
-    @objc func cool() {}
+    @objc func entryClick(_ sender: NSMenuItem) {
+        let sendingEntry = Int(sender.title)!
+        if sendingEntry == -1 { return }
+        openURL(url: feedEntries[sendingEntry].link ?? "")
+    }
+
+    @IBAction func openURL(url: String) {
+        if url == "" { return }
+        NSWorkspace.shared.open(URL(string: url)!)
+    }
     
     // reload() is async to not delay other actions such as closing preferences
     @objc func reload() async {
