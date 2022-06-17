@@ -39,16 +39,16 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4G4-AO-njM">
-                                <rect key="frame" x="18" y="256" width="114" height="24"/>
+                                <rect key="frame" x="18" y="256" width="136" height="24"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Display Data" id="GCK-uJ-UHJ">
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Displayed Data" id="GCK-uJ-UHJ">
                                     <font key="font" metaFont="system" size="20"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
                             <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="5ei-jp-1Mf">
-                                <rect key="frame" x="138" y="265" width="292" height="5"/>
+                                <rect key="frame" x="163" y="265" width="267" height="5"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                             </box>
                             <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="uGs-9T-U9Y">
