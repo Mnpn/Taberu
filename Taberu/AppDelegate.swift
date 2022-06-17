@@ -78,8 +78,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 menu.addItem(NSMenuItem(title: "Failed to fetch from set URL.", action: nil, keyEquivalent: ""))
             }
 
+            let dTitle = UserDefaults.standard.bool(forKey: "should_display_title")
+            let dDesc = UserDefaults.standard.bool(forKey: "should_display_description")
+            let dDate = UserDefaults.standard.bool(forKey: "should_display_date")
+
             for entry in feedEntries {
-                if UserDefaults.standard.bool(forKey: "should_display_title") {
+                if dTitle {
                     let titleItem = NSMenuItem(title: "Placeholder", action: #selector(entryClick), keyEquivalent: "")
                     // set the title to the index of the item in the array. the attributed title will override the
                     // user-visible NSMenuItem name, but we'll still be able to fetch the "fake index" title later!
@@ -89,9 +93,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
 
                 let descItem = NSMenuItem(title: "Placeholder", action: nil, keyEquivalent: "")
-    
-                let dDesc = UserDefaults.standard.bool(forKey: "should_display_description")
-                let dDate = UserDefaults.standard.bool(forKey: "should_display_date")
 
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "y-MM-d"
@@ -135,11 +136,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc func openPreferences() {
-        let storyboard = NSStoryboard(name: NSStoryboard.Name("Preferences"), bundle: nil)
-        preferencesController = storyboard.instantiateInitialController() as? NSWindowController
-        preferencesController?.showWindow(nil)
+        preferencesWindowController?.showWindow(self)
     }
     
+    private lazy var preferencesWindowController: NSWindowController? = { // limit to one preference pane open at a time
+        let storyboard = NSStoryboard(name: NSStoryboard.Name("Preferences"), bundle: nil)
+        return storyboard.instantiateInitialController() as? NSWindowController
+    }()
+
     func applicationWillTerminate(_ aNotification: Notification) { }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
