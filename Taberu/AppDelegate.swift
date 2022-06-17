@@ -66,42 +66,39 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func createMenu() {
         let menu = NSMenu()
         
-        let validURL = (currentURL?.absoluteURL != nil)
-        if !validURL {
+        if currentURL?.absoluteString == nil || currentURL?.absoluteString == "" {
             menu.addItem(NSMenuItem(title: "No URL provided! Set one in Preferences.", action: nil, keyEquivalent: ""))
-        }
-        
-    
-        let reload = NSMenuItem(title: "Reload", action: #selector(reload), keyEquivalent: "R")
-        menu.addItem(reload)
-    
-        menu.addItem(NSMenuItem.separator())
-        
-        if feedEntries.count == 0 {
-            menu.addItem(NSMenuItem(title: "Failed to fetch from set URL.", action: nil, keyEquivalent: ""))
-        }
-        
-        for entry in feedEntries {
-            if UserDefaults.standard.bool(forKey: "should_display_title") {
-                menu.addItem(NSMenuItem(title: entry.title ?? "Unknown title", action: #selector(cool), keyEquivalent: ""))
-            }
-            
-            let dDesc = UserDefaults.standard.bool(forKey: "should_display_description")
-            let dDate = UserDefaults.standard.bool(forKey: "should_display_date")
-            
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "y-MM-d"
-            let date = dateFormatter.string(from: entry.pubDate!)
-            let desc = (entry.description ?? "Unknown description")
-            
-            let bottomField = (dDate ? date : "") + ((dDate && dDesc) ? ": " : "") + (dDesc ? desc : "")
-            if bottomField != "" {
-                menu.addItem(NSMenuItem(title: bottomField, action: nil, keyEquivalent: ""))
-            }
-            
-            menu.addItem(NSMenuItem.separator())
-        }
+        } else {
+            let reload = NSMenuItem(title: "Reload", action: #selector(reload), keyEquivalent: "R")
+            menu.addItem(reload)
 
+            menu.addItem(NSMenuItem.separator())
+
+            if feedEntries.count == 0 {
+                menu.addItem(NSMenuItem(title: "Failed to fetch from set URL.", action: nil, keyEquivalent: ""))
+            }
+
+            for entry in feedEntries {
+                if UserDefaults.standard.bool(forKey: "should_display_title") {
+                    menu.addItem(NSMenuItem(title: entry.title ?? "Unknown title", action: #selector(cool), keyEquivalent: ""))
+                }
+    
+                let dDesc = UserDefaults.standard.bool(forKey: "should_display_description")
+                let dDate = UserDefaults.standard.bool(forKey: "should_display_date")
+
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "y-MM-d"
+                let date = dateFormatter.string(from: entry.pubDate!)
+                let desc = (entry.description ?? "Unknown description")
+
+                let bottomField = (dDate ? date : "") + ((dDate && dDesc) ? ": " : "") + (dDesc ? desc : "")
+                if bottomField != "" {
+                    menu.addItem(NSMenuItem(title: bottomField, action: nil, keyEquivalent: ""))
+                }
+    
+                menu.addItem(NSMenuItem.separator())
+            }
+        }
         menu.addItem(NSMenuItem(title: "Preferences…", action: #selector(openPreferences), keyEquivalent: ","))
         menu.addItem(NSMenuItem(title: "Quit Taberu", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         statusItem.menu = menu
@@ -112,9 +109,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // reload() is async to not delay other actions such as closing preferences
     @objc func reload() async {
         feedEntries = [] // clear current entries
-        let url = UserDefaults.standard.string(forKey: "feed_url") // get latest set URL
-        currentURL = URL(string: url ?? "")!
-        fetch(url: currentURL!) // fetch new data
+
+        currentURL = URL(string: UserDefaults.standard.string(forKey: "feed_url")!)
+        if currentURL != nil {
+            fetch(url: currentURL!) // fetch new data
+        }
         createMenu() // refresh the menu
     }
     
