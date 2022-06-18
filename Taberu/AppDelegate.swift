@@ -34,9 +34,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // create a menu bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "arrow.up.arrow.down.square.fill", accessibilityDescription: "Taberu")
-        }
+        setIcon(iconName: "tray.full.fill")
         
         Task { // can't call async from a sync function, so we create a task
             await reload(syncOverride: true)
@@ -71,6 +69,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func createMenu() {
         let menu = NSMenu()
+        menu.delegate = self
         
         if currentURL?.absoluteString == nil || currentURL?.absoluteString == "" {
             menu.addItem(NSMenuItem(title: "No URL provided! Set one in Preferences.", action: nil, keyEquivalent: ""))
@@ -137,13 +136,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // reload() is async to not delay other actions such as closing preferences
     @objc func reload(syncOverride: Bool) async {
         maxEntries = UserDefaults.standard.integer(forKey: "max_feed_entries")
+        var mostRecentEntry = RSSFeedItem.init()
+        if(feedEntries.count > 0) {
+            mostRecentEntry = feedEntries[0]
+        }
 
         currentURL = URL(string: UserDefaults.standard.string(forKey: "feed_url")!)
         if currentURL != nil && (currentURL != lastFetchedURL || syncOverride) { // don't make unnecessary network requests
+            setIcon(iconName: "tray.and.arrow.down.fill")
             feedEntries = [] // clear current entries
             fetch(url: currentURL!) // fetch new data
         }
         createMenu() // refresh the menu
+        if(feedEntries.count > 0) {
+            setIcon(iconName: (feedEntries[0] != mostRecentEntry) ? "tray.full.fill" : "tray.fill")
+        } else {
+            setIcon(iconName: "bin.xmark.fill")
+        }
     }
     
     // because calling an async function directly from the #selector causes a general protection fault :D
@@ -160,6 +169,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return storyboard.instantiateInitialController() as? NSWindowController
     }()
 
+    func setIcon(iconName: String) { // todo: if new entries, full, otherwise not
+        if let button = statusItem.button {
+            DispatchQueue.main.async { // nsstaTUSbaRbutToN SetimAGe muSt be used fRom maiN tHrEad OnLY, so let's do that
+                button.image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Taberu")
+            }
+        }
+    }
+
     func applicationWillTerminate(_ aNotification: Notification) { }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
@@ -167,3 +184,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
+extension AppDelegate: NSMenuDelegate {
+    func menuWillOpen(_ menu: NSMenu) { setIcon(iconName: "tray.fill") }
+}
