@@ -159,7 +159,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="hour" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" inset="2" selectedItem="PRP-Vm-tZN" id="I1Y-l2-jKO">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="menu"/>
                                     <menu key="menu" id="HmU-i1-7YV">
                                         <items>
                                             <menuItem title="minute" id="IIW-S4-cbP"/>
@@ -234,7 +234,7 @@
                                 </buttonCell>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="88m-0Q-DDW">
-                                <rect key="frame" x="30" y="241" width="80" height="16"/>
+                                <rect key="frame" x="24" y="241" width="80" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Feed Entries" id="KJB-cq-vqV">
                                     <font key="font" metaFont="system"/>
@@ -243,7 +243,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="g0s-YZ-iea">
-                                <rect key="frame" x="237" y="241" width="85" height="16"/>
+                                <rect key="frame" x="231" y="241" width="85" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="General Feed" id="GBT-21-By5">
                                     <font key="font" metaFont="system"/>

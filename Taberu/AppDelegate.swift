@@ -102,35 +102,55 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
 
-            menu.addItem(NSMenuItem(title: "Reload" + (autoFetch! ? " (Auto-fetch is on)" : ""), action: #selector(bakaReload), keyEquivalent: "R"))
-            menu.addItem(NSMenuItem.separator())
+            let refresh = NSMenuItem(title: "Refresh", action: #selector(bakaReload), keyEquivalent: "R")
+            let refreshString = NSMutableAttributedString(string: "Refresh")
+            if autoFetch! {
+                refreshString.append(NSMutableAttributedString(string: " (Auto-fetch is on)", attributes: [NSAttributedString.Key.foregroundColor: NSColor.darkGray]))
+            }
+            refresh.attributedTitle = refreshString
+            menu.addItem(refresh)
 
             var i = 0
             for entry in feedEntries {
                 i += 1
                 if i > maxEntries { break }
-                if dTitle! {
-                    let titleItem = NSMenuItem(title: "Placeholder", action: #selector(entryClick), keyEquivalent: "")
+
+                menu.addItem(NSMenuItem.separator())
+                let entryItem = NSMenuItem(title: "Placeholder", action: #selector(entryClick), keyEquivalent: "")
+                let attrstring = NSMutableAttributedString(string: dTitle! ? (entry.title ?? "Unknown title") : "")
+
+                var bottomField = ""
+                if dAuthor! {
+                    let author = entry.author ?? "Unknown author"
+                    bottomField += author
+                }
+                if dDate! {
+                    bottomField += dAuthor! ? " at " : ""
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "y-MM-d"
+                    bottomField += dateFormatter.string(from: entry.pubDate!)
+                }
+                if dDesc! {
+                    bottomField += (dDate! || dAuthor!) ? ": " : ""
+                    bottomField += entry.description ?? "Unknown description"
+                }
+
+                if dDate! || dDesc! || dAuthor! {
+                    attrstring.append(NSMutableAttributedString(string: (dTitle! ? "\n" : "") + bottomField, attributes:
+                                    [NSAttributedString.Key.foregroundColor: NSColor.darkGray,
+                                     NSAttributedString.Key.font: NSFont.systemFont(ofSize: 12)]))
+                }
+
+                if dTitle! || dAuthor! || dDesc! || dDate! {
+                    entryItem.attributedTitle = attrstring
                     // set the title to the index of the item in the array. the attributed title will override the
                     // user-visible NSMenuItem name, but we'll still be able to fetch the "fake index" title later!
-                    titleItem.attributedTitle = NSAttributedString(string: entry.title ?? "Unknown title")
-                    titleItem.title = String(feedEntries.firstIndex(of: entry) ?? -1)
-                    menu.addItem(titleItem)
+                    entryItem.title = String(feedEntries.firstIndex(of: entry) ?? -1)
+                    menu.addItem(entryItem)
+                } else {
+                    menu.addItem(NSMenuItem(title: "A feed is loaded, but you're not displaying any of it!", action: nil, keyEquivalent: ""))
+                    break // don't make more than one of these please
                 }
-
-                let descItem = NSMenuItem(title: "Placeholder", action: nil, keyEquivalent: "")
-
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "y-MM-d"
-                let date = dateFormatter.string(from: entry.pubDate!)
-                let desc = (entry.description ?? "Unknown description")
-                let author = (entry.author ?? "Unknown author")
-
-                let bottomField = (dAuthor! ? author : "") + ((dAuthor! && (dDate! || dDesc!)) ? " at " : "") + (dDate! ? date : "") + ((dDate! && dDesc!) ? ": " : "") + (dDesc! ? desc : "")
-                if bottomField != "" {
-                    descItem.attributedTitle = NSAttributedString(string: bottomField)
-                }
-                menu.addItem(descItem)
             }
         }
 
