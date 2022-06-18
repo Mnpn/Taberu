@@ -43,6 +43,7 @@ class PreferencesViewController: NSViewController {
         super.viewDidAppear()
         view.window!.styleMask.remove(.resizable)
         view.window!.center()
+        NSApp.activate(ignoringOtherApps: true)
         view.window!.makeKeyAndOrderFront(nil)
     }
     
