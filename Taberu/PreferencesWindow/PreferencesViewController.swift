@@ -74,8 +74,6 @@ class PreferencesViewController: NSViewController {
         df.set(Int(maxTextField.stringValue), forKey: "max_feed_entries")
         
         let delegate = NSApplication.shared.delegate as! AppDelegate
-        Task {
-            await delegate.reload(syncOverride: false)
-        }
+        delegate.initFeed()
     }
 }

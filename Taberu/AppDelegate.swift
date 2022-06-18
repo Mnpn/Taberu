@@ -15,8 +15,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var preferencesController: NSWindowController?
     var currentURL: URL?
     var lastFetchedURL: URL?
+    var mostRecentlyViewedEntry = RSSFeedItem.init()
     var autoFetch: Bool?
     var autoFetchTime: Int?
+    weak var autoFetchTimer: Timer?
+
+    var dTitle: Bool?
+    var dDesc: Bool?
+    var dDate: Bool?
+    var dAuthor: Bool?
     
     var feedEntries: [RSSFeedItem] = []
     var maxEntries = 10
@@ -40,9 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         setIcon(iconName: "tray.full.fill")
         
-        Task { // can't call async from a sync function, so we create a task
-            await reload(syncOverride: true)
-        }
+        initFeed()
     }
     
     func fetch(url: URL) {
@@ -87,16 +92,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 menu.addItem(NSMenuItem(title: "Failed to fetch from set URL.", action: nil, keyEquivalent: ""))
             }
 
-            let dTitle = UserDefaults.standard.bool(forKey: "should_display_title")
-            let dDesc = UserDefaults.standard.bool(forKey: "should_display_description")
-            let dDate = UserDefaults.standard.bool(forKey: "should_display_date")
-            let dAuthor = UserDefaults.standard.bool(forKey: "should_display_author")
-
             var i = 0
             for entry in feedEntries {
                 i += 1
                 if i > maxEntries { break }
-                if dTitle {
+                if dTitle! {
                     let titleItem = NSMenuItem(title: "Placeholder", action: #selector(entryClick), keyEquivalent: "")
                     // set the title to the index of the item in the array. the attributed title will override the
                     // user-visible NSMenuItem name, but we'll still be able to fetch the "fake index" title later!
@@ -113,7 +113,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 let desc = (entry.description ?? "Unknown description")
                 let author = (entry.author ?? "Unknown author")
 
-                let bottomField = (dAuthor ? author : "") + ((dAuthor && (dDate || dDesc)) ? " at " : "") + (dDate ? date : "") + ((dDate && dDesc) ? ": " : "") + (dDesc ? desc : "")
+                let bottomField = (dAuthor! ? author : "") + ((dAuthor! && (dDate! || dDesc!)) ? " at " : "") + (dDate! ? date : "") + ((dDate! && dDesc!) ? ": " : "") + (dDesc! ? desc : "")
                 if bottomField != "" {
                     descItem.attributedTitle = NSAttributedString(string: bottomField)
                 }
@@ -138,17 +138,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     // reload() is async to not delay other actions such as closing preferences
-    @objc func reload(syncOverride: Bool) async {
-        autoFetch = UserDefaults.standard.bool(forKey: "should_autofetch")
-        autoFetchTime = UserDefaults.standard.integer(forKey: "autofetch_time")
-
-        maxEntries = UserDefaults.standard.integer(forKey: "max_feed_entries")
-        var mostRecentEntry = RSSFeedItem.init()
-        if feedEntries.count > 0 {
-            mostRecentEntry = feedEntries[0]
-        }
-
-        currentURL = URL(string: UserDefaults.standard.string(forKey: "feed_url")!)
+    func reload(syncOverride: Bool) async {
         if currentURL != nil && (currentURL != lastFetchedURL || syncOverride) { // don't make unnecessary network requests
             setIcon(iconName: "tray.and.arrow.down.fill")
             feedEntries = [] // clear current entries
@@ -156,17 +146,36 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         createMenu() // refresh the menu
         if feedEntries.count > 0 {
-            setIcon(iconName: (feedEntries[0] != mostRecentEntry) ? "tray.full.fill" : "tray.fill")
+            setIcon(iconName: (feedEntries[0] != mostRecentlyViewedEntry) ? "tray.full.fill" : "tray.fill")
         } else {
             setIcon(iconName: "bin.xmark.fill")
         }
-
-        if autoFetch! {} else {}
     }
     
     // because calling an async function directly from the #selector causes a general protection fault :D
     @objc func bakaReload() {
         Task { await reload(syncOverride: true) }
+    }
+
+    func initFeed() {
+        maxEntries = UserDefaults.standard.integer(forKey: "max_feed_entries")
+        currentURL = URL(string: UserDefaults.standard.string(forKey: "feed_url")!)
+        autoFetch = UserDefaults.standard.bool(forKey: "should_autofetch")
+        autoFetchTime = UserDefaults.standard.integer(forKey: "autofetch_time")
+
+        dTitle = UserDefaults.standard.bool(forKey: "should_display_title")
+        dDesc = UserDefaults.standard.bool(forKey: "should_display_description")
+        dDate = UserDefaults.standard.bool(forKey: "should_display_date")
+        dAuthor = UserDefaults.standard.bool(forKey: "should_display_author")
+
+        Task { await reload(syncOverride: false) }
+
+        autoFetchTimer?.invalidate()
+        if autoFetch! {
+            autoFetchTimer = Timer.scheduledTimer(withTimeInterval: Double(autoFetchTime!) * 60.0, repeats: true) { timer in
+                self.bakaReload()
+            }
+        }
     }
 
     @objc func openPreferences() {
@@ -194,5 +203,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 extension AppDelegate: NSMenuDelegate {
-    func menuWillOpen(_ menu: NSMenu) { setIcon(iconName: "tray.fill") }
+    func menuWillOpen(_ menu: NSMenu) {
+        setIcon(iconName: "tray.fill")
+        if feedEntries.count > 0 {
+            mostRecentlyViewedEntry = feedEntries[0]
+        }
+    }
 }
