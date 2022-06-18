@@ -116,7 +116,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 if i > maxEntries { break }
 
                 menu.addItem(NSMenuItem.separator())
-                let entryItem = NSMenuItem(title: String(feedEntries.firstIndex(of: entry) ?? -1), action: #selector(entryClick), keyEquivalent: "")
+                let entryItem = NSMenuItem(title: "Placeholder", action: #selector(entryClick), keyEquivalent: "")
                 let attrstring = NSMutableAttributedString(string: dTitle! ? (entry.title ?? "Unknown title") : "")
 
                 var bottomField = ""
@@ -145,6 +145,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     entryItem.attributedTitle = attrstring
                     // set the title to the index of the item in the array. the attributed title will override the
                     // user-visible NSMenuItem name, but we'll still be able to fetch the "fake index" title later!
+                    entryItem.title = String(feedEntries.firstIndex(of: entry) ?? -1)
                     menu.addItem(entryItem)
                 } else {
                     menu.addItem(NSMenuItem(title: "A feed is loaded, but you're not displaying any of it!", action: nil, keyEquivalent: ""))
