@@ -12,6 +12,8 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var autoFetchCheck: NSButton!
     @IBOutlet weak var autoFetchTextField: NSTextField!
     @IBOutlet weak var autoFetchUnit: NSPopUpButton!
+    @IBOutlet weak var feedTitleCheck: NSButton!
+    @IBOutlet weak var feedDescCheck: NSButton!
     @IBOutlet weak var titleCheck: NSButton!
     @IBOutlet weak var descCheck: NSButton!
     @IBOutlet weak var dateCheck: NSButton!
@@ -25,6 +27,8 @@ class PreferencesViewController: NSViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        feedTitleCheck?.state = df.bool(forKey: "should_display_feed_title") ? NSControl.StateValue.on : NSControl.StateValue.off
+        feedDescCheck?.state = df.bool(forKey: "should_display_feed_description") ? NSControl.StateValue.on : NSControl.StateValue.off
         titleCheck?.state = df.bool(forKey: "should_display_title") ? NSControl.StateValue.on : NSControl.StateValue.off
         descCheck?.state = df.bool(forKey: "should_display_description") ? NSControl.StateValue.on : NSControl.StateValue.off
         dateCheck?.state = df.bool(forKey: "should_display_date") ? NSControl.StateValue.on : NSControl.StateValue.off
@@ -63,6 +67,8 @@ class PreferencesViewController: NSViewController {
     
     override func viewWillDisappear() {
         super.viewWillDisappear()
+        df.set(feedTitleCheck.state == NSControl.StateValue.on, forKey: "should_display_feed_title")
+        df.set(feedDescCheck.state == NSControl.StateValue.on, forKey: "should_display_feed_description")
         df.set(titleCheck.state == NSControl.StateValue.on, forKey: "should_display_title")
         df.set(descCheck.state == NSControl.StateValue.on, forKey: "should_display_description")
         df.set(dateCheck.state == NSControl.StateValue.on, forKey: "should_display_date")

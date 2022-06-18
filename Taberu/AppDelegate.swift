@@ -20,11 +20,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var autoFetchTime: Int?
     weak var autoFetchTimer: Timer?
 
+    var dFTitle: Bool?
+    var dFDesc: Bool?
     var dTitle: Bool?
     var dDesc: Bool?
     var dDate: Bool?
     var dAuthor: Bool?
     
+    var feedName: String?
+    var feedDesc: String?
     var feedEntries: [RSSFeedItem] = []
     var maxEntries = 10
 
@@ -36,6 +40,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 "max_feed_entries": 10,
                 "autofetch_time": 60, // minutes
                 "should_autofetch": true,
+                "should_display_feed_title": true,
+                "should_display_feed_description": false,
                 "should_display_title": true,
                 "should_display_description": true,
                 "should_display_date": true,
@@ -61,6 +67,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 for _ in feed.entries ?? [] {
                 }
             case let .rss(feed):
+                feedName = feed.title
+                feedDesc = feed.description
                 for ae in feed.items ?? [] {
                     feedEntries.append(ae)
                 }
@@ -83,14 +91,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if currentURL?.absoluteString == nil || currentURL?.absoluteString == "" {
             menu.addItem(NSMenuItem(title: "No URL provided! Set one in Preferences.", action: nil, keyEquivalent: ""))
         } else {
-            let reload = NSMenuItem(title: "Reload" + (autoFetch! ? " (Auto-fetch is on)" : ""), action: #selector(bakaReload), keyEquivalent: "R")
-            menu.addItem(reload)
-
-            menu.addItem(NSMenuItem.separator())
-
             if feedEntries.count == 0 {
                 menu.addItem(NSMenuItem(title: "Failed to fetch from set URL.", action: nil, keyEquivalent: ""))
+            } else {
+                if dFTitle! {
+                    menu.addItem(NSMenuItem(title: feedName ?? "Unknown feed name", action: nil, keyEquivalent: ""))
+                }
+                if dFDesc! {
+                    menu.addItem(NSMenuItem(title: feedDesc ?? "Unknown feed description", action: nil, keyEquivalent: ""))
+                }
             }
+
+            menu.addItem(NSMenuItem(title: "Reload" + (autoFetch! ? " (Auto-fetch is on)" : ""), action: #selector(bakaReload), keyEquivalent: "R"))
+            menu.addItem(NSMenuItem.separator())
 
             var i = 0
             for entry in feedEntries {
@@ -118,9 +131,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     descItem.attributedTitle = NSAttributedString(string: bottomField)
                 }
                 menu.addItem(descItem)
-                menu.addItem(NSMenuItem.separator())
             }
         }
+
+        menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Preferences…", action: #selector(openPreferences), keyEquivalent: ","))
         menu.addItem(NSMenuItem(title: "Quit Taberu", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         statusItem.menu = menu
@@ -145,10 +159,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             fetch(url: currentURL!) // fetch new data
         }
         createMenu() // refresh the menu
-        if feedEntries.count > 0 {
+        if currentURL?.absoluteString == nil || currentURL?.absoluteString == "" {
+            setIcon(iconName: "slash.circle")
+        } else if feedEntries.count > 0 {
             setIcon(iconName: (feedEntries[0] != mostRecentlyViewedEntry) ? "tray.full.fill" : "tray.fill")
         } else {
-            setIcon(iconName: "bin.xmark.fill")
+            setIcon(iconName: "xmark.circle") // bin.xmark.fill
         }
     }
     
@@ -163,6 +179,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         autoFetch = UserDefaults.standard.bool(forKey: "should_autofetch")
         autoFetchTime = UserDefaults.standard.integer(forKey: "autofetch_time")
 
+        dFTitle = UserDefaults.standard.bool(forKey: "should_display_feed_title")
+        dFDesc = UserDefaults.standard.bool(forKey: "should_display_feed_description")
         dTitle = UserDefaults.standard.bool(forKey: "should_display_title")
         dDesc = UserDefaults.standard.bool(forKey: "should_display_description")
         dDate = UserDefaults.standard.bool(forKey: "should_display_date")
@@ -204,7 +222,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 extension AppDelegate: NSMenuDelegate {
     func menuWillOpen(_ menu: NSMenu) {
-        setIcon(iconName: "tray.fill")
+        if feedEntries.count > 0 && (currentURL?.absoluteString != nil && currentURL?.absoluteString != "") {
+            setIcon(iconName: "tray.fill")
+        }
+
         if feedEntries.count > 0 {
             mostRecentlyViewedEntry = feedEntries[0]
         }
