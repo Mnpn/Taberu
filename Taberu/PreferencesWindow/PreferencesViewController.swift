@@ -9,6 +9,9 @@ import Cocoa
 
 class PreferencesViewController: NSViewController {
     @IBOutlet weak var URLTextField: NSTextField!
+    @IBOutlet weak var autoFetchCheck: NSButton!
+    @IBOutlet weak var autoFetchTextField: NSTextField!
+    @IBOutlet weak var autoFetchUnit: NSPopUpButton!
     @IBOutlet weak var titleCheck: NSButton!
     @IBOutlet weak var descCheck: NSButton!
     @IBOutlet weak var dateCheck: NSButton!
@@ -26,6 +29,13 @@ class PreferencesViewController: NSViewController {
         descCheck?.state = df.bool(forKey: "should_display_description") ? NSControl.StateValue.on : NSControl.StateValue.off
         dateCheck?.state = df.bool(forKey: "should_display_date") ? NSControl.StateValue.on : NSControl.StateValue.off
         authorCheck?.state = df.bool(forKey: "should_display_author") ? NSControl.StateValue.on : NSControl.StateValue.off
+        autoFetchCheck?.state = df.bool(forKey: "should_autofetch") ? NSControl.StateValue.on : NSControl.StateValue.off
+
+        let autoFetchTime = Int32(df.integer(forKey: "autofetch_time"))
+        let isMinute = autoFetchTime / 60 < 1
+        autoFetchTextField?.intValue = isMinute ? autoFetchTime : autoFetchTime / 60
+        autoFetchUnit?.selectItem(at: isMinute ? 0 : 1)
+
         URLTextField?.stringValue = df.string(forKey: "feed_url") ?? ""
         maxTextField?.stringValue = String(df.integer(forKey: "max_feed_entries"))
         
@@ -57,6 +67,9 @@ class PreferencesViewController: NSViewController {
         df.set(descCheck.state == NSControl.StateValue.on, forKey: "should_display_description")
         df.set(dateCheck.state == NSControl.StateValue.on, forKey: "should_display_date")
         df.set(authorCheck.state == NSControl.StateValue.on, forKey: "should_display_author")
+        df.set(autoFetchCheck.state == NSControl.StateValue.on, forKey: "should_autofetch")
+        df.set(autoFetchTextField.intValue * Int32(pow(60.0, Double(autoFetchUnit.indexOfSelectedItem))),
+               forKey: "autofetch_time") // x*60^0 = minutes, x*60^1 = hours in minutes
         df.set(URLTextField.stringValue, forKey: "feed_url")
         df.set(Int(maxTextField.stringValue), forKey: "max_feed_entries")
         

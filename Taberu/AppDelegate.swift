@@ -15,6 +15,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var preferencesController: NSWindowController?
     var currentURL: URL?
     var lastFetchedURL: URL?
+    var autoFetch: Bool?
+    var autoFetchTime: Int?
     
     var feedEntries: [RSSFeedItem] = []
     var maxEntries = 10
@@ -25,6 +27,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             defaults: [
                 "feed_url": "",
                 "max_feed_entries": 10,
+                "autofetch_time": 60, // minutes
+                "should_autofetch": true,
                 "should_display_title": true,
                 "should_display_description": true,
                 "should_display_date": true,
@@ -49,14 +53,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         case .success(let feed):
             switch feed {
             case let .atom(feed):
-                for ae in feed.entries ?? [] {
+                for _ in feed.entries ?? [] {
                 }
             case let .rss(feed):
                 for ae in feed.items ?? [] {
                     feedEntries.append(ae)
                 }
             case let .json(feed):
-                for ae in feed.items ?? [] {
+                for _ in feed.items ?? [] {
                 }
             }
             
@@ -74,7 +78,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if currentURL?.absoluteString == nil || currentURL?.absoluteString == "" {
             menu.addItem(NSMenuItem(title: "No URL provided! Set one in Preferences.", action: nil, keyEquivalent: ""))
         } else {
-            let reload = NSMenuItem(title: "Reload", action: #selector(bakaReload), keyEquivalent: "R")
+            let reload = NSMenuItem(title: "Reload" + (autoFetch! ? " (Auto-fetch is on)" : ""), action: #selector(bakaReload), keyEquivalent: "R")
             menu.addItem(reload)
 
             menu.addItem(NSMenuItem.separator())
@@ -135,9 +139,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // reload() is async to not delay other actions such as closing preferences
     @objc func reload(syncOverride: Bool) async {
+        autoFetch = UserDefaults.standard.bool(forKey: "should_autofetch")
+        autoFetchTime = UserDefaults.standard.integer(forKey: "autofetch_time")
+
         maxEntries = UserDefaults.standard.integer(forKey: "max_feed_entries")
         var mostRecentEntry = RSSFeedItem.init()
-        if(feedEntries.count > 0) {
+        if feedEntries.count > 0 {
             mostRecentEntry = feedEntries[0]
         }
 
@@ -148,11 +155,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             fetch(url: currentURL!) // fetch new data
         }
         createMenu() // refresh the menu
-        if(feedEntries.count > 0) {
+        if feedEntries.count > 0 {
             setIcon(iconName: (feedEntries[0] != mostRecentEntry) ? "tray.full.fill" : "tray.fill")
         } else {
             setIcon(iconName: "bin.xmark.fill")
         }
+
+        if autoFetch! {} else {}
     }
     
     // because calling an async function directly from the #selector causes a general protection fault :D
@@ -169,7 +178,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return storyboard.instantiateInitialController() as? NSWindowController
     }()
 
-    func setIcon(iconName: String) { // todo: if new entries, full, otherwise not
+    func setIcon(iconName: String) {
         if let button = statusItem.button {
             DispatchQueue.main.async { // nsstaTUSbaRbutToN SetimAGe muSt be used fRom maiN tHrEad OnLY, so let's do that
                 button.image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Taberu")
