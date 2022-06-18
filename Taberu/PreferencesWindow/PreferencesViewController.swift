@@ -12,6 +12,8 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var titleCheck: NSButton!
     @IBOutlet weak var descCheck: NSButton!
     @IBOutlet weak var dateCheck: NSButton!
+    @IBOutlet weak var authorCheck: NSButton!
+    @IBOutlet weak var maxTextField: NSTextField!
     
     @IBOutlet weak var versionLabel: NSTextField!
     @IBOutlet var link: NSTextView!
@@ -23,7 +25,9 @@ class PreferencesViewController: NSViewController {
         titleCheck?.state = df.bool(forKey: "should_display_title") ? NSControl.StateValue.on : NSControl.StateValue.off
         descCheck?.state = df.bool(forKey: "should_display_description") ? NSControl.StateValue.on : NSControl.StateValue.off
         dateCheck?.state = df.bool(forKey: "should_display_date") ? NSControl.StateValue.on : NSControl.StateValue.off
-        URLTextField?.stringValue = UserDefaults.standard.string(forKey: "feed_url") ?? ""
+        authorCheck?.state = df.bool(forKey: "should_display_author") ? NSControl.StateValue.on : NSControl.StateValue.off
+        URLTextField?.stringValue = df.string(forKey: "feed_url") ?? ""
+        maxTextField?.stringValue = String(df.integer(forKey: "max_feed_entries"))
         
         // https://stackoverflow.com/questions/3015796
         let version: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
@@ -52,11 +56,13 @@ class PreferencesViewController: NSViewController {
         df.set(titleCheck.state == NSControl.StateValue.on, forKey: "should_display_title")
         df.set(descCheck.state == NSControl.StateValue.on, forKey: "should_display_description")
         df.set(dateCheck.state == NSControl.StateValue.on, forKey: "should_display_date")
+        df.set(authorCheck.state == NSControl.StateValue.on, forKey: "should_display_author")
         df.set(URLTextField.stringValue, forKey: "feed_url")
+        df.set(Int(maxTextField.stringValue), forKey: "max_feed_entries")
         
         let delegate = NSApplication.shared.delegate as! AppDelegate
         Task {
-            await delegate.reload()
+            await delegate.reload(syncOverride: false)
         }
     }
 }

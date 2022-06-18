@@ -14,17 +14,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     var preferencesController: NSWindowController?
     var currentURL: URL?
+    var lastFetchedURL: URL?
     
     var feedEntries: [RSSFeedItem] = []
+    var maxEntries = 10
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // set default UserDefaults if they do not exist
         UserDefaults.standard.register(
             defaults: [
                 "feed_url": "",
+                "max_feed_entries": 10,
                 "should_display_title": true,
                 "should_display_description": true,
-                "should_display_date": true
+                "should_display_date": true,
+                "should_display_author": false
             ]
         )
 
@@ -35,7 +39,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         Task { // can't call async from a sync function, so we create a task
-            await reload()
+            await reload(syncOverride: true)
         }
     }
     
@@ -61,6 +65,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         case .failure(let error):
             print(error)
         }
+
+        lastFetchedURL = url
     }
     
     func createMenu() {
@@ -81,8 +87,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let dTitle = UserDefaults.standard.bool(forKey: "should_display_title")
             let dDesc = UserDefaults.standard.bool(forKey: "should_display_description")
             let dDate = UserDefaults.standard.bool(forKey: "should_display_date")
+            let dAuthor = UserDefaults.standard.bool(forKey: "should_display_author")
 
+            var i = 0
             for entry in feedEntries {
+                i += 1
+                if i > maxEntries { break }
                 if dTitle {
                     let titleItem = NSMenuItem(title: "Placeholder", action: #selector(entryClick), keyEquivalent: "")
                     // set the title to the index of the item in the array. the attributed title will override the
@@ -98,13 +108,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 dateFormatter.dateFormat = "y-MM-d"
                 let date = dateFormatter.string(from: entry.pubDate!)
                 let desc = (entry.description ?? "Unknown description")
+                let author = (entry.author ?? "Unknown author")
 
-                let bottomField = (dDate ? date : "") + ((dDate && dDesc) ? ": " : "") + (dDesc ? desc : "")
+                let bottomField = (dAuthor ? author : "") + ((dAuthor && (dDate || dDesc)) ? " at " : "") + (dDate ? date : "") + ((dDate && dDesc) ? ": " : "") + (dDesc ? desc : "")
                 if bottomField != "" {
                     descItem.attributedTitle = NSAttributedString(string: bottomField)
                 }
                 menu.addItem(descItem)
-    
                 menu.addItem(NSMenuItem.separator())
             }
         }
@@ -125,11 +135,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     // reload() is async to not delay other actions such as closing preferences
-    @objc func reload() async {
-        feedEntries = [] // clear current entries
+    @objc func reload(syncOverride: Bool) async {
+        maxEntries = UserDefaults.standard.integer(forKey: "max_feed_entries")
 
         currentURL = URL(string: UserDefaults.standard.string(forKey: "feed_url")!)
-        if currentURL != nil {
+        if currentURL != nil && (currentURL != lastFetchedURL || syncOverride) { // don't make unnecessary network requests
+            feedEntries = [] // clear current entries
             fetch(url: currentURL!) // fetch new data
         }
         createMenu() // refresh the menu
@@ -137,7 +148,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // because calling an async function directly from the #selector causes a general protection fault :D
     @objc func bakaReload() {
-        Task { await reload() }
+        Task { await reload(syncOverride: true) }
     }
 
     @objc func openPreferences() {
