@@ -15,7 +15,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var preferencesController: NSWindowController?
     var currentURL: URL?
     var lastFetchedURL: URL?
-    var mostRecentlyViewedEntry = RSSFeedItem.init()
     var autoFetch: Bool?
     var autoFetchTime: Int?
     weak var autoFetchTimer: Timer?
@@ -26,10 +25,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var dDesc: Bool?
     var dDate: Bool?
     var dAuthor: Bool?
-    
+
+    var showUnreadMarkers = true
+
     var feedName: String?
     var feedDesc: String?
     var feedEntries: [RSSFeedItem] = []
+    var lastFeedEntries: [RSSFeedItem] = []
+    var unreadEntries: [Bool] = []
     var maxEntries = 10
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -45,7 +48,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 "should_display_title": true,
                 "should_display_description": true,
                 "should_display_date": true,
-                "should_display_author": false
+                "should_display_author": false,
+                "should_mark_unread": true
             ]
         )
 
@@ -110,14 +114,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             refresh.attributedTitle = refreshString
             menu.addItem(refresh)
 
-            var i = 0
-            for entry in feedEntries {
-                i += 1
-                if i > maxEntries { break }
+            for (i, entry) in feedEntries.enumerated() {
+                if i+1 > maxEntries { break }
 
                 menu.addItem(NSMenuItem.separator())
                 let entryItem = NSMenuItem(title: "Placeholder", action: #selector(entryClick), keyEquivalent: "")
-                let attrstring = NSMutableAttributedString(string: dTitle! ? (entry.title ?? "Unknown title") : "")
+                let attrstring = NSMutableAttributedString(string: "")
+                if showUnreadMarkers {
+                    attrstring.append(NSMutableAttributedString(string: (unreadEntries[i] ? "◉ " : ""), attributes: [NSAttributedString.Key.foregroundColor: NSColor.systemRed]))
+                }
+                attrstring.append(NSMutableAttributedString(string: (dTitle! ? (entry.title ?? "Unknown title") : "")))
 
                 var bottomField = ""
                 if dAuthor! {
@@ -175,14 +181,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func reload(syncOverride: Bool) async {
         if currentURL != nil && (currentURL != lastFetchedURL || syncOverride) { // don't make unnecessary network requests
             setIcon(iconName: "tray.and.arrow.down.fill")
+            lastFeedEntries = feedEntries
             feedEntries = [] // clear current entries
             fetch(url: currentURL!) // fetch new data
+            unreadEntries = [Bool](repeating: false, count: feedEntries.count)
+            for (i, entry) in feedEntries.enumerated() {
+                var found = false
+                for oldentry in lastFeedEntries {
+                    if entry == oldentry {
+                        found = true
+                        break // stop looking if it's found
+                    }
+                }
+                if !found {
+                    unreadEntries[i] = true
+                }
+            }
         }
         createMenu() // refresh the menu
         if currentURL?.absoluteString == nil || currentURL?.absoluteString == "" {
             setIcon(iconName: "slash.circle")
         } else if feedEntries.count > 0 {
-            setIcon(iconName: (feedEntries[0] != mostRecentlyViewedEntry) ? "tray.full.fill" : "tray.fill")
+            setIcon(iconName: unreadEntries.contains(true) ? "tray.full.fill" : "tray.fill")
         } else {
             setIcon(iconName: "xmark.circle") // bin.xmark.fill
         }
@@ -205,6 +225,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         dDesc = UserDefaults.standard.bool(forKey: "should_display_description")
         dDate = UserDefaults.standard.bool(forKey: "should_display_date")
         dAuthor = UserDefaults.standard.bool(forKey: "should_display_author")
+
+        showUnreadMarkers = UserDefaults.standard.bool(forKey: "should_mark_unread")
 
         Task { await reload(syncOverride: false) }
 
@@ -242,12 +264,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 extension AppDelegate: NSMenuDelegate {
     func menuWillOpen(_ menu: NSMenu) {
-        if feedEntries.count > 0 && (currentURL?.absoluteString != nil && currentURL?.absoluteString != "") {
+        if unreadEntries.contains(true) { // are there unread entries?
             setIcon(iconName: "tray.fill")
         }
+    }
 
-        if feedEntries.count > 0 {
-            mostRecentlyViewedEntry = feedEntries[0]
-        }
+    func menuDidClose(_ menu: NSMenu) {
+        unreadEntries = [Bool](repeating: false, count: feedEntries.count)
+        createMenu()
     }
 }

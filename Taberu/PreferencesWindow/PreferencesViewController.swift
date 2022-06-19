@@ -19,6 +19,7 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var dateCheck: NSButton!
     @IBOutlet weak var authorCheck: NSButton!
     @IBOutlet weak var maxTextField: NSTextField!
+    @IBOutlet weak var unreadCheck: NSButton!
     
     @IBOutlet weak var versionLabel: NSTextField!
     @IBOutlet var link: NSTextView!
@@ -33,6 +34,7 @@ class PreferencesViewController: NSViewController {
         descCheck?.state = df.bool(forKey: "should_display_description") ? NSControl.StateValue.on : NSControl.StateValue.off
         dateCheck?.state = df.bool(forKey: "should_display_date") ? NSControl.StateValue.on : NSControl.StateValue.off
         authorCheck?.state = df.bool(forKey: "should_display_author") ? NSControl.StateValue.on : NSControl.StateValue.off
+        unreadCheck?.state = df.bool(forKey: "should_mark_unread") ? NSControl.StateValue.on : NSControl.StateValue.off
         autoFetchCheck?.state = df.bool(forKey: "should_autofetch") ? NSControl.StateValue.on : NSControl.StateValue.off
 
         let autoFetchTime = Int32(df.integer(forKey: "autofetch_time"))
@@ -54,7 +56,7 @@ class PreferencesViewController: NSViewController {
         link.checkTextInDocument(nil)
         link.isEditable = false
 
-        self.preferredContentSize = NSMakeSize(450, 300)
+        self.preferredContentSize = NSMakeSize(450, 320)
     }
     
     override func viewDidAppear() {
@@ -67,13 +69,14 @@ class PreferencesViewController: NSViewController {
     
     override func viewWillDisappear() {
         super.viewWillDisappear()
-        df.set(feedTitleCheck.state == NSControl.StateValue.on, forKey: "should_display_feed_title")
-        df.set(feedDescCheck.state == NSControl.StateValue.on, forKey: "should_display_feed_description")
-        df.set(titleCheck.state == NSControl.StateValue.on, forKey: "should_display_title")
-        df.set(descCheck.state == NSControl.StateValue.on, forKey: "should_display_description")
-        df.set(dateCheck.state == NSControl.StateValue.on, forKey: "should_display_date")
-        df.set(authorCheck.state == NSControl.StateValue.on, forKey: "should_display_author")
-        df.set(autoFetchCheck.state == NSControl.StateValue.on, forKey: "should_autofetch")
+        df.set(feedTitleCheck.state, forKey: "should_display_feed_title")
+        df.set(feedDescCheck.state, forKey: "should_display_feed_description")
+        df.set(titleCheck.state, forKey: "should_display_title")
+        df.set(descCheck.state, forKey: "should_display_description")
+        df.set(dateCheck.state, forKey: "should_display_date")
+        df.set(authorCheck.state, forKey: "should_display_author")
+        df.set(unreadCheck.state, forKey: "should_mark_unread")
+        df.set(autoFetchCheck.state, forKey: "should_autofetch")
         df.set(autoFetchTextField.intValue * Int32(pow(60.0, Double(autoFetchUnit.indexOfSelectedItem))),
                forKey: "autofetch_time") // x*60^0 = minutes, x*60^1 = hours in minutes
         df.set(URLTextField.stringValue, forKey: "feed_url")
