@@ -56,6 +56,9 @@ class PreferencesViewController: NSViewController {
         link.checkTextInDocument(nil)
         link.isEditable = false
 
+        autoFetchTextField.formatter = nombas()
+        maxTextField.formatter = nombas()
+
         self.preferredContentSize = NSMakeSize(450, 320)
     }
     
@@ -84,5 +87,11 @@ class PreferencesViewController: NSViewController {
         
         let delegate = NSApplication.shared.delegate as! AppDelegate
         delegate.initFeed()
+    }
+}
+
+class nombas: NumberFormatter {
+    override func isPartialStringValid(_ partialString: String, newEditingString newString: AutoreleasingUnsafeMutablePointer<NSString?>?, errorDescription error: AutoreleasingUnsafeMutablePointer<NSString?>?) -> Bool { // wtf
+        return partialString == partialString.components(separatedBy: NSCharacterSet(charactersIn: "0123456789").inverted).joined(separator: "")
     }
 }
