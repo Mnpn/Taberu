@@ -153,7 +153,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
 
-            let refresh = NSMenuItem(title: "Refresh", action: #selector(bakaReload), keyEquivalent: "R")
+            let refresh = NSMenuItem(title: "Refresh", action: #selector(bakaReload), keyEquivalent: "r")
             let refreshString = NSMutableAttributedString(string: "Refresh")
             if autoFetch! {
                 refreshString.append(NSMutableAttributedString(string: " (Auto-fetch is on)", attributes:
@@ -161,6 +161,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             refresh.attributedTitle = refreshString
             menu.addItem(refresh)
+
+            let hardRefresh = menu.addItem(withTitle: "Refresh and Reset All Entries", action: #selector(bakaReload), keyEquivalent:"r")
+            hardRefresh.isAlternate = true
+            hardRefresh.keyEquivalentModifierMask = [.option] //, .command]
 
             var allFeedEntries: [Entry] = []
             for feed in feeds {
@@ -263,7 +267,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     // because calling an async function directly from the #selector causes a general protection fault :D
-    @objc func bakaReload() {
+    @objc func bakaReload(_ sender: NSMenuItem) {
+        if sender.isAlternate { initFeed() } // coming from hard refresh
         Task { await reload(syncOverride: true) }
     }
 
@@ -291,7 +296,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         autoFetchTimer?.invalidate()
         if autoFetch! {
             autoFetchTimer = Timer.scheduledTimer(withTimeInterval: Double(autoFetchTime!) * 60.0, repeats: true) { timer in
-                self.bakaReload()
+                Task { await self.reload(syncOverride: true) }
             }
         }
     }
