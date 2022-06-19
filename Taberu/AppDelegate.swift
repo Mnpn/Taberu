@@ -8,31 +8,44 @@
 import Cocoa
 import FeedKit
 
+class Entry {
+    let item: RSSFeedItem
+    var unread: Bool = true
+
+    init(item: RSSFeedItem) {
+        self.item = item
+    }
+}
+
+class Feed {
+    let url: URL
+    var active: Bool
+    var entries: [Entry] = []
+    var name = "Unknown feed name"
+    var desc = "Unknown feed description"
+
+    init(url: URL, active: Bool) {
+        self.url = url
+        self.active = active
+    }
+}
+
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
-    
     var preferencesController: NSWindowController?
-    var currentURL: URL?
-    var lastFetchedURL: URL?
+
+    var daijoubujanai = ""
+
     var autoFetch: Bool?
     var autoFetchTime: Int?
     weak var autoFetchTimer: Timer?
 
-    var dFTitle: Bool?
-    var dFDesc: Bool?
-    var dTitle: Bool?
-    var dDesc: Bool?
-    var dDate: Bool?
-    var dAuthor: Bool?
-
+    var dFTitle, dFDesc, dTitle, dDesc, dDate, dAuthor: Bool?
     var showUnreadMarkers = true
+    var hasUnread = false
 
-    var feedName: String?
-    var feedDesc: String?
-    var feedEntries: [RSSFeedItem] = []
-    var lastFeedEntries: [RSSFeedItem] = []
-    var unreadEntries: [Bool] = []
+    var feeds: [Feed] = []
     var maxEntries = 10
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -59,86 +72,128 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         initFeed()
     }
-    
-    func fetch(url: URL) {
+
+    func fetch(url: URL, forFeed: Int) {
         if url.absoluteString == "" { return } // don't fetch empty strings
+        daijoubujanai = "" // clear previous fetch errors
         let parser = FeedParser(URL: url)
         let result = parser.parse()
         switch result {
         case .success(let feed):
             switch feed {
             case let .atom(feed):
-                for _ in feed.entries ?? [] {
-                }
+                for _ in feed.entries ?? [] {}
             case let .rss(feed):
-                feedName = feed.title
-                feedDesc = feed.description
+                feeds[forFeed].name = feed.title ?? "Unknown title"
+                feeds[forFeed].desc = feed.description ?? "Unknown description"
                 for ae in feed.items ?? [] {
-                    feedEntries.append(ae)
+                    // only add new items to the feed
+                    if !feeds[forFeed].entries.contains(where: { ae == $0.item }) {
+                        hasUnread = true
+                        feeds[forFeed].entries.append(Entry(item: ae))
+                    }
                 }
             case let .json(feed):
-                for _ in feed.items ?? [] {
-                }
+                for _ in feed.items ?? [] {}
             }
             
         case .failure(let error):
             print(error)
+            daijoubujanai = error.localizedDescription
         }
-
-        lastFetchedURL = url
     }
-    
+
     func createMenu() {
         let menu = NSMenu()
         menu.delegate = self
-        
-        if currentURL?.absoluteString == nil || currentURL?.absoluteString == "" {
-            menu.addItem(NSMenuItem(title: "No URL provided! Set one in Preferences.", action: nil, keyEquivalent: ""))
+
+        if feeds.count > 1 {
+            let feedOption = NSMenuItem(title: "Active feeds", action: nil, keyEquivalent: "")
+            let feedSelector = NSMenu()
+
+            for (i, feed) in feeds.enumerated() {
+                let feedEntry = NSMenuItem(title: "Placeholder", action: #selector(toggleFeedVisibility), keyEquivalent: "")
+                feedEntry.attributedTitle = NSAttributedString(string: feed.name)
+                feedEntry.title = String(i)
+                feedEntry.state = feed.active ? NSControl.StateValue.on : NSControl.StateValue.off
+                feedSelector.addItem(feedEntry)
+            }
+            menu.setSubmenu(feedSelector, for: feedOption)
+            menu.addItem(feedOption)
+        }
+
+        var activeFeeds = 0
+        var lastActiveFeed = 0
+        for (i, feed) in feeds.enumerated() {
+            if feed.active { activeFeeds += 1; lastActiveFeed = i }
+        }
+
+        var errMsg = ""
+        if feeds.count == 0 {
+            errMsg += "No URLs have been added!\nPlease set some in Preferences."
+        } else if activeFeeds == 0 {
+            errMsg += "No feeds are currently active!\nThey'll show up here if you make them visible."
         } else {
-            if feedEntries.count == 0 {
-                menu.addItem(NSMenuItem(title: "Failed to fetch from set URL.", action: nil, keyEquivalent: ""))
+            if daijoubujanai != "" {
+                errMsg += "Failed to fetch from one or more URLs:\n" + daijoubujanai
             } else {
-                if dFTitle! {
-                    menu.addItem(NSMenuItem(title: feedName ?? "Unknown feed name", action: nil, keyEquivalent: ""))
-                }
-                if dFDesc! {
-                    menu.addItem(NSMenuItem(title: feedDesc ?? "Unknown feed description", action: nil, keyEquivalent: ""))
+                if activeFeeds == 1 && (dFTitle! || dFDesc!) {
+                    let info = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+                    let infoString = NSMutableAttributedString()
+                    if dFTitle! {
+                        infoString.append(NSMutableAttributedString(string: feeds[lastActiveFeed].name))
+                    }
+                    if dFDesc! {
+                        infoString.append(NSMutableAttributedString(string: dFTitle! ? "\n" : "" + feeds[lastActiveFeed].desc))
+                    }
+                    info.attributedTitle = infoString
+                    menu.addItem(info)
+                } else if dFTitle! || dFDesc! { // want to display a title or desc, but there are several feeds active
+                    menu.addItem(NSMenuItem(title: "Displaying content from several feeds", action: nil, keyEquivalent: ""))
                 }
             }
 
             let refresh = NSMenuItem(title: "Refresh", action: #selector(bakaReload), keyEquivalent: "R")
             let refreshString = NSMutableAttributedString(string: "Refresh")
             if autoFetch! {
-                refreshString.append(NSMutableAttributedString(string: " (Auto-fetch is on)", attributes: [NSAttributedString.Key.foregroundColor: NSColor.darkGray]))
+                refreshString.append(NSMutableAttributedString(string: " (Auto-fetch is on)", attributes:
+                                    [NSAttributedString.Key.foregroundColor: NSColor.darkGray]))
             }
             refresh.attributedTitle = refreshString
             menu.addItem(refresh)
 
-            for (i, entry) in feedEntries.enumerated() {
-                if i+1 > maxEntries { break }
-
-                menu.addItem(NSMenuItem.separator())
-                let entryItem = NSMenuItem(title: "Placeholder", action: #selector(entryClick), keyEquivalent: "")
-                let attrstring = NSMutableAttributedString(string: "")
-                if showUnreadMarkers {
-                    attrstring.append(NSMutableAttributedString(string: (unreadEntries[i] ? "◉ " : ""), attributes: [NSAttributedString.Key.foregroundColor: NSColor.systemRed]))
+            var allFeedEntries: [Entry] = []
+            for feed in feeds {
+                if feed.active {
+                    allFeedEntries.append(contentsOf: feed.entries)
                 }
-                attrstring.append(NSMutableAttributedString(string: (dTitle! ? (entry.title ?? "Unknown title") : "")))
+            }
+            let sortedEntries = allFeedEntries.sorted(by: { $0.item.pubDate! > $1.item.pubDate! }) // sort by date
+            for (i, entry) in sortedEntries.enumerated() {
+                if i+1 > maxEntries { break } // only add as many (active) entries as we want
+                menu.addItem(NSMenuItem.separator())
+
+                let entryItem = NSMenuItem(title: "Placeholder", action: #selector(entryClick), keyEquivalent: "")
+                let attrstring = NSMutableAttributedString()
+                if showUnreadMarkers && entry.unread {
+                    attrstring.append(NSMutableAttributedString(string: "◉ ", attributes: [NSAttributedString.Key.foregroundColor: NSColor.systemRed]))
+                }
+                attrstring.append(NSMutableAttributedString(string: (dTitle! ? (entry.item.title ?? "Unknown title") : "")))
 
                 var bottomField = ""
                 if dAuthor! {
-                    let author = entry.author ?? "Unknown author"
+                    let author = entry.item.author ?? "Unknown author"
                     bottomField += author
                 }
                 if dDate! {
                     bottomField += dAuthor! ? " at " : ""
                     let dateFormatter = DateFormatter()
                     dateFormatter.dateFormat = "y-MM-d"
-                    bottomField += dateFormatter.string(from: entry.pubDate!)
+                    bottomField += dateFormatter.string(from: entry.item.pubDate!)
                 }
                 if dDesc! {
                     bottomField += (dDate! || dAuthor!) ? ": " : ""
-                    bottomField += entry.description ?? "Unknown description"
+                    bottomField += entry.item.description ?? "Unknown description"
                 }
 
                 if dDate! || dDesc! || dAuthor! {
@@ -149,9 +204,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
                 if dTitle! || dAuthor! || dDesc! || dDate! {
                     entryItem.attributedTitle = attrstring
-                    // set the title to the index of the item in the array. the attributed title will override the
-                    // user-visible NSMenuItem name, but we'll still be able to fetch the "fake index" title later!
-                    entryItem.title = String(feedEntries.firstIndex(of: entry) ?? -1)
+                    // store the link in the title (attr overrides the content), this lets us fetch it on click events later
+                    entryItem.title = String(entry.item.link ?? "")
                     menu.addItem(entryItem)
                 } else {
                     menu.addItem(NSMenuItem(title: "A feed is loaded, but you're not displaying any of it!", action: nil, keyEquivalent: ""))
@@ -160,54 +214,54 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        if errMsg != "" {
+            let err = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+            err.attributedTitle = NSAttributedString(string: errMsg) // attributed overrides title and lets use use \n
+            menu.addItem(err)
+        }
+
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Preferences…", action: #selector(openPreferences), keyEquivalent: ","))
         menu.addItem(NSMenuItem(title: "Quit Taberu", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         statusItem.menu = menu
     }
     
+    @objc func toggleFeedVisibility(_ sender: NSMenuItem) {
+        let index = Int(sender.title)!
+        feeds[index].active = !feeds[index].active // toggle
+        createMenu()
+    }
+
     @objc func entryClick(_ sender: NSMenuItem) {
-        let sendingEntry = Int(sender.title)!
-        if sendingEntry == -1 { return }
-        openURL(url: feedEntries[sendingEntry].link ?? "")
+        if sender.title == "" { return }
+        openURL(url: sender.title)
     }
 
     func openURL(url: String) {
-        if url == "" { return }
         NSWorkspace.shared.open(URL(string: url)!)
     }
-    
+
     // reload() is async to not delay other actions such as closing preferences
     func reload(syncOverride: Bool) async {
-        if currentURL != nil && (currentURL != lastFetchedURL || syncOverride) { // don't make unnecessary network requests
-            setIcon(iconName: "tray.and.arrow.down.fill")
-            lastFeedEntries = feedEntries
-            feedEntries = [] // clear current entries
-            fetch(url: currentURL!) // fetch new data
-            unreadEntries = [Bool](repeating: false, count: feedEntries.count)
-            for (i, entry) in feedEntries.enumerated() {
-                var found = false
-                for oldentry in lastFeedEntries {
-                    if entry == oldentry {
-                        found = true
-                        break // stop looking if it's found
-                    }
-                }
-                if !found {
-                    unreadEntries[i] = true
-                }
+        for (i, feed) in feeds.enumerated() {
+            // don't make unnecessary network requests
+            if feed.url.absoluteString != "" || syncOverride { // todo: don't reload on prefs close
+                setIcon(iconName: "tray.and.arrow.down.fill")
+                fetch(url: feed.url, forFeed: i)
             }
         }
+
         createMenu() // refresh the menu
-        if currentURL?.absoluteString == nil || currentURL?.absoluteString == "" {
+
+        if feeds.count == 0 {
             setIcon(iconName: "slash.circle")
-        } else if feedEntries.count > 0 {
-            setIcon(iconName: unreadEntries.contains(true) ? "tray.full.fill" : "tray.fill")
+        } else if daijoubujanai != "" {
+            setIcon(iconName: "xmark.circle")
         } else {
-            setIcon(iconName: "xmark.circle") // bin.xmark.fill
+            setIcon(iconName: hasUnread ? "tray.full.fill" : "tray.fill")
         }
     }
-    
+
     // because calling an async function directly from the #selector causes a general protection fault :D
     @objc func bakaReload() {
         Task { await reload(syncOverride: true) }
@@ -215,7 +269,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func initFeed() {
         maxEntries = UserDefaults.standard.integer(forKey: "max_feed_entries")
-        currentURL = URL(string: UserDefaults.standard.string(forKey: "feed_url")!)
+        feeds = []
+        let setURLs = [URL(string: UserDefaults.standard.string(forKey: "feed_url")!)] // can't get the nil op working here at all for some reason.. todo: be an array anyways
+        for url in setURLs {
+            feeds.append(Feed(url: url!, active: true))
+        }
         autoFetch = UserDefaults.standard.bool(forKey: "should_autofetch")
         autoFetchTime = UserDefaults.standard.integer(forKey: "autofetch_time")
 
@@ -241,7 +299,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func openPreferences() {
         preferencesWindowController?.showWindow(self)
     }
-    
+
     private lazy var preferencesWindowController: NSWindowController? = { // limit to one preference pane open at a time
         let storyboard = NSStoryboard(name: NSStoryboard.Name("Preferences"), bundle: nil)
         return storyboard.instantiateInitialController() as? NSWindowController
@@ -264,13 +322,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 extension AppDelegate: NSMenuDelegate {
     func menuWillOpen(_ menu: NSMenu) {
-        if unreadEntries.contains(true) { // are there unread entries?
+        for feed in feeds {
+            if feed.active { // only mark as read for active (visible) feeds
+                for entry in feed.entries {
+                    entry.unread = false
+                }
+            }
+        }
+        if hasUnread {
             setIcon(iconName: "tray.fill")
         }
     }
 
     func menuDidClose(_ menu: NSMenu) {
-        unreadEntries = [Bool](repeating: false, count: feedEntries.count)
+        hasUnread = false
         createMenu()
     }
 }
