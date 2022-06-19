@@ -47,6 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var showUnreadMarkers = true
     var hasUnread = false
     var showTooltips = true
+    var miniTitles = 1
 
     var feeds: [Feed] = []
     var maxEntries = 10
@@ -66,7 +67,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 "should_display_date": true,
                 "should_display_author": false,
                 "should_mark_unread": true,
-                "should_show_tooltips": true
+                "should_show_tooltips": true,
+                "minititles_position": 1
             ]
         )
 
@@ -152,7 +154,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     }
                     info.attributedTitle = infoString
                     menu.addItem(info)
-                } else if dFTitle! || dFDesc! { // want to display a title or desc, but there are several feeds active
+                } else if (dFTitle! || dFDesc!) && miniTitles == 0 { // want to display a title or desc, but there are several feeds active
                     menu.addItem(NSMenuItem(title: "Displaying content from several feeds", action: nil, keyEquivalent: ""))
                 }
             }
@@ -184,12 +186,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 let entryItem = NSMenuItem(title: "Placeholder", action: #selector(entryClick), keyEquivalent: "")
                 let attrstring = NSMutableAttributedString()
                 if activeFeeds > 1 && entry.parent.name != "Unknown feed name" { // && (dFTitle! || dFDesc!) ?
-                    /*let paragraph = NSMutableParagraphStyle()
-                    paragraph.alignment = .right
-                    attrstring.append(NSMutableAttributedString(string: "\t" + entry.parent.name + "\n", attributes:
-                        [NSAttributedString.Key.foregroundColor: NSColor.gray,
-                        NSAttributedString.Key.font: NSFont.systemFont(ofSize: 10),
-                         .paragraphStyle: paragraph]))*/
+                    if miniTitles != 0 {
+                        let paragraph = NSMutableParagraphStyle()
+                        switch miniTitles {
+                            case 1: paragraph.alignment = .left
+                            case 2: paragraph.alignment = .center
+                            case 3:  paragraph.alignment = .right
+                            default: assertionFailure("Hit an unknown minititle position")
+                        }
+                        attrstring.append(NSMutableAttributedString(string: entry.parent.name + "\n", attributes:
+                            [NSAttributedString.Key.foregroundColor: NSColor.gray,
+                            NSAttributedString.Key.font: NSFont.systemFont(ofSize: 10),
+                             .paragraphStyle: paragraph]))
+                    }
                     if showTooltips {
                         entryItem.toolTip = "From \"" + entry.parent.name + "\"\nClick to visit page."
                     }
@@ -307,6 +316,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         showUnreadMarkers = ud.bool(forKey: "should_mark_unread")
         showTooltips = ud.bool(forKey: "should_show_tooltips")
+        miniTitles = ud.integer(forKey: "minititles_position")
 
         Task { await reload(syncOverride: false) }
 

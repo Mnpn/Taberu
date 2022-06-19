@@ -21,6 +21,7 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var maxTextField: NSTextField!
     @IBOutlet weak var unreadCheck: NSButton!
     @IBOutlet weak var tooltipCheck: NSButton!
+    @IBOutlet weak var miniTitles: NSSegmentedControl!
     
     @IBOutlet weak var versionLabel: NSTextField!
     @IBOutlet var link: NSTextView!
@@ -38,6 +39,8 @@ class PreferencesViewController: NSViewController {
         unreadCheck?.state = df.bool(forKey: "should_mark_unread") ? NSControl.StateValue.on : NSControl.StateValue.off
         tooltipCheck?.state = df.bool(forKey: "should_show_tooltips") ? NSControl.StateValue.on : NSControl.StateValue.off
         autoFetchCheck?.state = df.bool(forKey: "should_autofetch") ? NSControl.StateValue.on : NSControl.StateValue.off
+
+        miniTitles?.selectedSegment = df.integer(forKey: "minititles_position")
 
         let autoFetchTime = Int32(df.integer(forKey: "autofetch_time"))
         let isMinute = autoFetchTime / 60 < 1
@@ -87,6 +90,7 @@ class PreferencesViewController: NSViewController {
                forKey: "autofetch_time") // x*60^0 = minutes, x*60^1 = hours in minutes
         df.set([URLTextField.stringValue], forKey: "feed_urls")
         df.set(Int(maxTextField.stringValue), forKey: "max_feed_entries")
+        df.set(miniTitles.selectedSegment, forKey: "minititles_position")
         
         let delegate = NSApplication.shared.delegate as! AppDelegate
         delegate.initFeed()

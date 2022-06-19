@@ -285,11 +285,11 @@
                             <segmentedControl verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VDF-SL-jry">
                                 <rect key="frame" x="114" y="158" width="116" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <segmentedCell key="cell" enabled="NO" borderStyle="border" alignment="left" style="roundRect" trackingMode="selectOne" id="USl-vn-Knx">
+                                <segmentedCell key="cell" borderStyle="border" alignment="left" style="roundRect" trackingMode="selectOne" id="USl-vn-Knx">
                                     <font key="font" metaFont="cellTitle"/>
                                     <segments>
-                                        <segment label="Off" toolTip="Disabled" width="36" selected="YES"/>
-                                        <segment toolTip="Left-side" image="NSGoLeftTemplate" tag="1"/>
+                                        <segment label="Off" toolTip="Disabled" width="36"/>
+                                        <segment toolTip="Left-side" image="NSGoLeftTemplate" selected="YES" tag="1"/>
                                         <segment toolTip="Centre" image="NSMenuMixedStateTemplate"/>
                                         <segment alignment="left" toolTip="Right-side" image="NSGoRightTemplate"/>
                                     </segments>
@@ -300,7 +300,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Feed titles" id="8Ni-hB-UZZ">
                                     <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="tertiaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
@@ -326,6 +326,7 @@
                         <outlet property="feedTitleCheck" destination="OVm-DA-h2D" id="gcL-Fn-zEL"/>
                         <outlet property="link" destination="UjJ-P5-dEO" id="oeE-sv-Cay"/>
                         <outlet property="maxTextField" destination="xGO-Ye-cTJ" id="Nun-0i-INR"/>
+                        <outlet property="miniTitles" destination="VDF-SL-jry" id="RY8-r6-UCX"/>
                         <outlet property="titleCheck" destination="EfN-3w-sV0" id="dWm-A6-mQx"/>
                         <outlet property="tooltipCheck" destination="z9c-gu-2bl" id="4BM-KD-x1i"/>
                         <outlet property="unreadCheck" destination="v9f-D9-O8c" id="idx-rL-nJ5"/>
