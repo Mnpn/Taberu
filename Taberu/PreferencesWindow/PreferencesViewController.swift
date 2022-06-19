@@ -20,6 +20,7 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var authorCheck: NSButton!
     @IBOutlet weak var maxTextField: NSTextField!
     @IBOutlet weak var unreadCheck: NSButton!
+    @IBOutlet weak var tooltipCheck: NSButton!
     
     @IBOutlet weak var versionLabel: NSTextField!
     @IBOutlet var link: NSTextView!
@@ -35,6 +36,7 @@ class PreferencesViewController: NSViewController {
         dateCheck?.state = df.bool(forKey: "should_display_date") ? NSControl.StateValue.on : NSControl.StateValue.off
         authorCheck?.state = df.bool(forKey: "should_display_author") ? NSControl.StateValue.on : NSControl.StateValue.off
         unreadCheck?.state = df.bool(forKey: "should_mark_unread") ? NSControl.StateValue.on : NSControl.StateValue.off
+        tooltipCheck?.state = df.bool(forKey: "should_show_tooltips") ? NSControl.StateValue.on : NSControl.StateValue.off
         autoFetchCheck?.state = df.bool(forKey: "should_autofetch") ? NSControl.StateValue.on : NSControl.StateValue.off
 
         let autoFetchTime = Int32(df.integer(forKey: "autofetch_time"))
@@ -42,7 +44,8 @@ class PreferencesViewController: NSViewController {
         autoFetchTextField?.intValue = isMinute ? autoFetchTime : autoFetchTime / 60
         autoFetchUnit?.selectItem(at: isMinute ? 0 : 1)
 
-        URLTextField?.stringValue = df.string(forKey: "feed_url") ?? ""
+        let tempKey = df.array(forKey: "feed_urls") ?? []
+        URLTextField?.stringValue = tempKey.count > 0 ? df.array(forKey: "feed_urls")?.first as! String : ""
         maxTextField?.stringValue = String(df.integer(forKey: "max_feed_entries"))
         
         // https://stackoverflow.com/questions/3015796
@@ -59,7 +62,7 @@ class PreferencesViewController: NSViewController {
         autoFetchTextField.formatter = nombas()
         maxTextField.formatter = nombas()
 
-        self.preferredContentSize = NSMakeSize(450, 320)
+        self.preferredContentSize = NSMakeSize(475, 333)
     }
     
     override func viewDidAppear() {
@@ -82,7 +85,7 @@ class PreferencesViewController: NSViewController {
         df.set(autoFetchCheck.state, forKey: "should_autofetch")
         df.set(autoFetchTextField.intValue * Int32(pow(60.0, Double(autoFetchUnit.indexOfSelectedItem))),
                forKey: "autofetch_time") // x*60^0 = minutes, x*60^1 = hours in minutes
-        df.set(URLTextField.stringValue, forKey: "feed_url")
+        df.set([URLTextField.stringValue], forKey: "feed_urls")
         df.set(Int(maxTextField.stringValue), forKey: "max_feed_entries")
         
         let delegate = NSApplication.shared.delegate as! AppDelegate

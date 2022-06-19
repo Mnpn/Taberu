@@ -10,10 +10,12 @@ import FeedKit
 
 class Entry {
     let item: RSSFeedItem
+    let parent: Feed
     var unread: Bool = true
 
-    init(item: RSSFeedItem) {
+    init(item: RSSFeedItem, parent: Feed) {
         self.item = item
+        self.parent = parent
     }
 }
 
@@ -44,6 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var dFTitle, dFDesc, dTitle, dDesc, dDate, dAuthor: Bool?
     var showUnreadMarkers = true
     var hasUnread = false
+    var showTooltips = true
 
     var feeds: [Feed] = []
     var maxEntries = 10
@@ -52,7 +55,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // set default UserDefaults if they do not exist
         UserDefaults.standard.register(
             defaults: [
-                "feed_url": "",
+                "feed_urls": [],
                 "max_feed_entries": 10,
                 "autofetch_time": 60, // minutes
                 "should_autofetch": true,
@@ -62,7 +65,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 "should_display_description": true,
                 "should_display_date": true,
                 "should_display_author": false,
-                "should_mark_unread": true
+                "should_mark_unread": true,
+                "should_show_tooltips": true
             ]
         )
 
@@ -90,7 +94,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     // only add new items to the feed
                     if !feeds[forFeed].entries.contains(where: { ae == $0.item }) {
                         hasUnread = true
-                        feeds[forFeed].entries.append(Entry(item: ae))
+                        feeds[forFeed].entries.append(Entry(item: ae, parent: feeds[forFeed]))
                     }
                 }
             case let .json(feed):
@@ -179,6 +183,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
                 let entryItem = NSMenuItem(title: "Placeholder", action: #selector(entryClick), keyEquivalent: "")
                 let attrstring = NSMutableAttributedString()
+                if activeFeeds > 1 && entry.parent.name != "Unknown feed name" { // && (dFTitle! || dFDesc!) ?
+                    /*let paragraph = NSMutableParagraphStyle()
+                    paragraph.alignment = .right
+                    attrstring.append(NSMutableAttributedString(string: "\t" + entry.parent.name + "\n", attributes:
+                        [NSAttributedString.Key.foregroundColor: NSColor.gray,
+                        NSAttributedString.Key.font: NSFont.systemFont(ofSize: 10),
+                         .paragraphStyle: paragraph]))*/
+                    if showTooltips {
+                        entryItem.toolTip = "From \"" + entry.parent.name + "\"\nClick to visit page."
+                    }
+                }
                 if showUnreadMarkers && entry.unread {
                     attrstring.append(NSMutableAttributedString(string: "◉ ", attributes: [NSAttributedString.Key.foregroundColor: NSColor.systemRed]))
                 }
@@ -220,7 +235,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         if errMsg != "" {
             let err = NSMenuItem(title: "", action: nil, keyEquivalent: "")
-            err.attributedTitle = NSAttributedString(string: errMsg) // attributed overrides title and lets use use \n
+            err.attributedTitle = NSAttributedString(string: errMsg) // attributed overrides title and lets us use \n
             menu.addItem(err)
         }
 
@@ -273,23 +288,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func initFeed() {
-        maxEntries = UserDefaults.standard.integer(forKey: "max_feed_entries")
+        let ud = UserDefaults.standard
+        maxEntries = ud.integer(forKey: "max_feed_entries")
         feeds = []
-        let setURLs = [URL(string: UserDefaults.standard.string(forKey: "feed_url")!)] // can't get the nil op working here at all for some reason.. todo: be an array anyways
+        let setURLs: [String] = (ud.array(forKey: "feed_urls") ?? []) as? [String] ?? []
         for url in setURLs {
-            feeds.append(Feed(url: url!, active: true))
+            feeds.append(Feed(url: URL(string: url)!, active: true))
         }
-        autoFetch = UserDefaults.standard.bool(forKey: "should_autofetch")
-        autoFetchTime = UserDefaults.standard.integer(forKey: "autofetch_time")
+        autoFetch = ud.bool(forKey: "should_autofetch")
+        autoFetchTime = ud.integer(forKey: "autofetch_time")
 
-        dFTitle = UserDefaults.standard.bool(forKey: "should_display_feed_title")
-        dFDesc = UserDefaults.standard.bool(forKey: "should_display_feed_description")
-        dTitle = UserDefaults.standard.bool(forKey: "should_display_title")
-        dDesc = UserDefaults.standard.bool(forKey: "should_display_description")
-        dDate = UserDefaults.standard.bool(forKey: "should_display_date")
-        dAuthor = UserDefaults.standard.bool(forKey: "should_display_author")
+        dFTitle = ud.bool(forKey: "should_display_feed_title")
+        dFDesc = ud.bool(forKey: "should_display_feed_description")
+        dTitle = ud.bool(forKey: "should_display_title")
+        dDesc = ud.bool(forKey: "should_display_description")
+        dDate = ud.bool(forKey: "should_display_date")
+        dAuthor = ud.bool(forKey: "should_display_author")
 
-        showUnreadMarkers = UserDefaults.standard.bool(forKey: "should_mark_unread")
+        showUnreadMarkers = ud.bool(forKey: "should_mark_unread")
+        showTooltips = ud.bool(forKey: "should_show_tooltips")
 
         Task { await reload(syncOverride: false) }
 
