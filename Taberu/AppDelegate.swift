@@ -200,7 +200,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                              .paragraphStyle: paragraph]))
                     }
                     if showTooltips {
-                        entryItem.toolTip = "From \"" + entry.parent.name + "\"\nClick to visit page."
+                        entryItem.toolTip = "From \"" + entry.parent.name + ((entry.item.link != nil) ? "\"\nClick to visit page." : "\"")
                     }
                 }
                 if showUnreadMarkers && entry.unread {
