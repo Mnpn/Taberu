@@ -301,7 +301,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         maxEntries = ud.integer(forKey: "max_feed_entries")
         feeds = []
         let setURLs: [String] = (ud.array(forKey: "feed_urls") ?? []) as? [String] ?? []
-        for url in setURLs {
+        for var url in setURLs {
+            url = url.filter {!$0.isWhitespace} // space in "New link" causes unwrap crash
             feeds.append(Feed(url: URL(string: url)!, active: true))
         }
         autoFetch = ud.bool(forKey: "should_autofetch")
@@ -361,7 +362,7 @@ extension AppDelegate: NSMenuDelegate {
                 }
             }
         }
-        if hasUnread {
+        if hasUnread && daijoubujanai == "" {
             setIcon(iconName: "tray.fill")
         }
     }

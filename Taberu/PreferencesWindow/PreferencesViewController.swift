@@ -8,7 +8,6 @@
 import Cocoa
 
 class PreferencesViewController: NSViewController {
-    @IBOutlet weak var URLTextField: NSTextField!
     @IBOutlet weak var autoFetchCheck: NSButton!
     @IBOutlet weak var autoFetchTextField: NSTextField!
     @IBOutlet weak var autoFetchUnit: NSPopUpButton!
@@ -21,12 +20,15 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var maxTextField: NSTextField!
     @IBOutlet weak var unreadCheck: NSButton!
     @IBOutlet weak var tooltipCheck: NSButton!
-    @IBOutlet weak var miniTitles: NSSegmentedControl!
+    @IBOutlet weak var miniTitles: NSPopUpButton!
     
+    @IBOutlet weak var URLTableView: NSTableView!
+    @IBOutlet weak var linkAddRemove: NSSegmentedControl!
     @IBOutlet weak var versionLabel: NSTextField!
     @IBOutlet var link: NSTextView!
     
     let df = UserDefaults.standard
+    var links: [String] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,15 +42,14 @@ class PreferencesViewController: NSViewController {
         tooltipCheck?.state = df.bool(forKey: "should_show_tooltips") ? NSControl.StateValue.on : NSControl.StateValue.off
         autoFetchCheck?.state = df.bool(forKey: "should_autofetch") ? NSControl.StateValue.on : NSControl.StateValue.off
 
-        miniTitles?.selectedSegment = df.integer(forKey: "minititles_position")
+        miniTitles?.selectItem(at: df.integer(forKey: "minititles_position"))
 
         let autoFetchTime = Int32(df.integer(forKey: "autofetch_time"))
         let isMinute = autoFetchTime / 60 < 1
         autoFetchTextField?.intValue = isMinute ? autoFetchTime : autoFetchTime / 60
         autoFetchUnit?.selectItem(at: isMinute ? 0 : 1)
 
-        let tempKey = df.array(forKey: "feed_urls") ?? []
-        URLTextField?.stringValue = tempKey.count > 0 ? df.array(forKey: "feed_urls")?.first as! String : ""
+        links = df.array(forKey: "feed_urls") as! [String]
         maxTextField?.stringValue = String(df.integer(forKey: "max_feed_entries"))
         
         // https://stackoverflow.com/questions/3015796
@@ -65,7 +66,10 @@ class PreferencesViewController: NSViewController {
         autoFetchTextField.formatter = nombas()
         maxTextField.formatter = nombas()
 
-        self.preferredContentSize = NSMakeSize(475, 333)
+        URLTableView.dataSource = self
+        URLTableView.delegate = self
+
+        self.preferredContentSize = NSMakeSize(550, 550)
     }
     
     override func viewDidAppear() {
@@ -88,17 +92,60 @@ class PreferencesViewController: NSViewController {
         df.set(autoFetchCheck.state, forKey: "should_autofetch")
         df.set(autoFetchTextField.intValue * Int32(pow(60.0, Double(autoFetchUnit.indexOfSelectedItem))),
                forKey: "autofetch_time") // x*60^0 = minutes, x*60^1 = hours in minutes
-        df.set([URLTextField.stringValue], forKey: "feed_urls")
+        df.set(links, forKey: "feed_urls")
         df.set(Int(maxTextField.stringValue), forKey: "max_feed_entries")
-        df.set(miniTitles.selectedSegment, forKey: "minititles_position")
+        df.set(miniTitles.indexOfSelectedItem, forKey: "minititles_position")
         
         let delegate = NSApplication.shared.delegate as! AppDelegate
         delegate.initFeed()
+    }
+
+    @IBAction func addRemoveURL(_ sender: NSSegmentedControl) {
+        if sender.selectedSegment == 0 { // +
+            links.append("New link")
+            URLTableView.reloadData()
+            URLTableView.selectRowIndexes(IndexSet(integer: links.count - 1), byExtendingSelection: false)
+        } else if sender.selectedSegment == 1 { // -
+            if URLTableView.selectedRow > -1 {
+                links.remove(at: URLTableView.selectedRow)
+                URLTableView.reloadData()
+                linkAddRemove.setEnabled(URLTableView.selectedRow != -1, forSegment: 1)
+            }
+        }
     }
 }
 
 class nombas: NumberFormatter {
     override func isPartialStringValid(_ partialString: String, newEditingString newString: AutoreleasingUnsafeMutablePointer<NSString?>?, errorDescription error: AutoreleasingUnsafeMutablePointer<NSString?>?) -> Bool { // wtf
         return partialString == partialString.components(separatedBy: NSCharacterSet(charactersIn: "0123456789").inverted).joined(separator: "")
+    }
+}
+
+// Thanks IINA - https://github.com/iina/iina
+extension PreferencesViewController: NSTableViewDelegate, NSTableViewDataSource, NSControlTextEditingDelegate {
+    func numberOfRows(in tableView: NSTableView) -> Int {
+        return links.count
+    }
+
+    func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
+        guard links.count > row else { return nil }
+        return links[row]
+    }
+
+    func tableView(_ tableView: NSTableView, setObjectValue object: Any?, for tableColumn: NSTableColumn?, row: Int) {
+        guard let value = object as? String else { return }
+        guard !value.isEmpty else {
+            print("moshi moshi? there's an empty value here")
+            return
+        }
+        guard links.count > row else { return }
+        links[row] = value
+    }
+
+    func tableViewSelectionDidChange(_ notification: Notification) {
+        if URLTableView.selectedRowIndexes.count == 0 {
+            URLTableView.reloadData()
+        }
+        linkAddRemove.setEnabled(URLTableView.selectedRow != -1, forSegment: 1)
     }
 }
