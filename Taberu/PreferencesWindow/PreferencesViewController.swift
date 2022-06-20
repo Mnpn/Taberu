@@ -148,4 +148,13 @@ extension PreferencesViewController: NSTableViewDelegate, NSTableViewDataSource,
         }
         linkAddRemove.setEnabled(URLTableView.selectedRow != -1, forSegment: 1)
     }
+
+    override func keyDown(with event: NSEvent) { // backspace key removing, segmented controls do not have keyEquivalents
+        if event.charactersIgnoringModifiers == String(Character(UnicodeScalar(NSDeleteCharacter)!)) {
+            if URLTableView.selectedRow > -1 {
+                links.remove(at: URLTableView.selectedRow)
+                URLTableView.reloadData()
+            }
+        }
+    }
 }
