@@ -104,7 +104,7 @@ class PreferencesViewController: NSViewController {
         if sender.selectedSegment == 0 { // +
             links.append("New link")
             URLTableView.reloadData()
-            URLTableView.selectRowIndexes(IndexSet(integer: links.count - 1), byExtendingSelection: false)
+            URLTableView.editColumn(0, row: links.count-1, with: nil, select: true) // newest will always be at the bottom
         } else if sender.selectedSegment == 1 { // -
             if URLTableView.selectedRow > -1 {
                 links.remove(at: URLTableView.selectedRow)
@@ -149,7 +149,9 @@ extension PreferencesViewController: NSTableViewDelegate, NSTableViewDataSource,
         linkAddRemove.setEnabled(URLTableView.selectedRow != -1, forSegment: 1)
     }
 
-    override func keyDown(with event: NSEvent) { // backspace key removing, segmented controls do not have keyEquivalents
+    // backspace key removing, segmented controls do not have keyEquivalents
+    // this does not run while editing, to our advantage
+    override func keyDown(with event: NSEvent) {
         if event.charactersIgnoringModifiers == String(Character(UnicodeScalar(NSDeleteCharacter)!)) {
             if URLTableView.selectedRow > -1 {
                 links.remove(at: URLTableView.selectedRow)
