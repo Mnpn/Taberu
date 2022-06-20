@@ -269,15 +269,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSWorkspace.shared.open(URL(string: url)!)
     }
 
+    var setURLs: [String] = [], lastURLs: [String] = []
     // reload() is async to not delay other actions such as closing preferences
     func reload(syncOverride: Bool) async {
         for (i, feed) in feeds.enumerated() {
-            // don't make unnecessary network requests
-            if feed.url.absoluteString != "" || syncOverride { // todo: don't reload on prefs close
+            if (feed.url.absoluteString != "" && setURLs != lastURLs) || syncOverride {
                 setIcon(iconName: "tray.and.arrow.down.fill")
                 fetch(url: feed.url, forFeed: i)
             }
         }
+        lastURLs = setURLs
 
         createMenu() // refresh the menu
 
@@ -292,19 +293,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // because calling an async function directly from the #selector causes a general protection fault :D
     @objc func bakaReload(_ sender: NSMenuItem) {
-        if sender.isAlternate { initFeed() } // coming from hard refresh
+        if sender.isAlternate { lastURLs = []; initFeed() } // coming from hard refresh
         Task { await reload(syncOverride: true) }
     }
 
     func initFeed() {
         let ud = UserDefaults.standard
         maxEntries = ud.integer(forKey: "max_feed_entries")
-        feeds = []
-        let setURLs: [String] = (ud.array(forKey: "feed_urls") ?? []) as? [String] ?? []
-        for var url in setURLs {
-            url = url.filter {!$0.isWhitespace} // space in "New link" causes unwrap crash
-            feeds.append(Feed(url: URL(string: url)!, active: true))
-        }
+
         autoFetch = ud.bool(forKey: "should_autofetch")
         autoFetchTime = ud.integer(forKey: "autofetch_time")
 
@@ -319,7 +315,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         showTooltips = ud.bool(forKey: "should_show_tooltips")
         miniTitles = ud.integer(forKey: "minititles_position")
 
-        Task { await reload(syncOverride: false) }
+        setURLs = (ud.array(forKey: "feed_urls") ?? []) as? [String] ?? []
+        if setURLs != lastURLs {
+            feeds = []
+            for var url in setURLs {
+                url = url.filter {!$0.isWhitespace} // space in "New link" causes unwrap crash
+                feeds.append(Feed(url: URL(string: url)!, active: true))
+            }
+        }
+
+        Task { await reload(syncOverride: setURLs != lastURLs) }
 
         autoFetchTimer?.invalidate()
         if autoFetch! {

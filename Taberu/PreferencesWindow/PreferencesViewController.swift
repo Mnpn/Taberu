@@ -69,7 +69,7 @@ class PreferencesViewController: NSViewController {
         URLTableView.dataSource = self
         URLTableView.delegate = self
 
-        self.preferredContentSize = NSMakeSize(550, 550)
+        self.preferredContentSize = NSMakeSize(550, 500)
     }
     
     override func viewDidAppear() {
