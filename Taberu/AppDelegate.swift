@@ -94,11 +94,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             case let .rss(feed):
                 feeds[forFeed].name = feed.title ?? "Unknown title"
                 feeds[forFeed].desc = feed.description ?? "Unknown description"
-                for ae in feed.items ?? [] {
-                    // only add new items to the feed
+                let feedItems = feed.items ?? []
+                for ae in feedItems {
+                    // only add new items to the feed..
                     if !feeds[forFeed].entries.contains(where: { ae == $0.item }) {
                         hasUnread = true
                         feeds[forFeed].entries.append(Entry(item: ae, parent: feeds[forFeed]))
+                    }
+                }
+
+                // ..but let's make sure to delete anything which is no longer present
+                for entry in feeds[forFeed].entries {
+                    if !feedItems.contains(where: { entry.item == $0 }) {
+                        feeds[forFeed].entries.removeAll(where: { entry.item == $0.item })
                     }
                 }
             case let .json(feed):
