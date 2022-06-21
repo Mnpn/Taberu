@@ -20,6 +20,7 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var authorCheck: NSButton!
     @IBOutlet weak var maxTextField: NSTextField!
     @IBOutlet weak var unreadCheck: NSButton!
+    @IBOutlet weak var unreadClearOption: NSPopUpButton!
     @IBOutlet weak var tooltipCheck: NSButton!
     @IBOutlet weak var miniTitles: NSPopUpButton!
     
@@ -43,6 +44,7 @@ class PreferencesViewController: NSViewController {
         tooltipCheck?.state = df.bool(forKey: "should_show_tooltips") ? NSControl.StateValue.on : NSControl.StateValue.off
         autoFetchCheck?.state = df.bool(forKey: "should_autofetch") ? NSControl.StateValue.on : NSControl.StateValue.off
 
+        unreadClearOption?.selectItem(at: df.integer(forKey: "unread_clearing_option"))
         dateTimeOption?.selectItem(at: df.integer(forKey: "date_time_option"))
         miniTitles?.selectItem(at: df.integer(forKey: "minititles_position"))
 
@@ -97,6 +99,7 @@ class PreferencesViewController: NSViewController {
                forKey: "autofetch_time") // x*60^0 = minutes, x*60^1 = hours in minutes
         df.set(links, forKey: "feed_urls")
         df.set(Int(maxTextField.stringValue), forKey: "max_feed_entries")
+        df.set(unreadClearOption.indexOfSelectedItem, forKey: "unread_clearing_option")
         df.set(dateTimeOption.indexOfSelectedItem, forKey: "date_time_option")
         df.set(miniTitles.indexOfSelectedItem, forKey: "minititles_position")
         

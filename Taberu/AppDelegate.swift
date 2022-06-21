@@ -11,11 +11,13 @@ import FeedKit
 class Entry {
     let item: RSSFeedItem
     let parent: Feed
+    let id: Int
     var unread: Bool = true
 
-    init(item: RSSFeedItem, parent: Feed) {
+    init(item: RSSFeedItem, parent: Feed, id: Int) {
         self.item = item
         self.parent = parent
+        self.id = id
     }
 }
 
@@ -37,6 +39,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     var preferencesController: NSWindowController?
 
+    var entryID = 0
     var daijoubujanai = ""
 
     var autoFetch: Bool?
@@ -45,6 +48,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var dFTitle, dFDesc, dTitle, dDesc, dDate, dAuthor: Bool?
     var showUnreadMarkers = true
+    var unreadClearing = 0
     var hasUnread = false
     var showTooltips = true
     var dateTimeOption = 0
@@ -69,6 +73,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 "should_display_author": false,
                 "should_mark_unread": true,
                 "should_show_tooltips": true,
+                "unread_clearing_option": 0, // on view
                 "date_time_option": 0, // both date & time
                 "minititles_position": 1 // to the left
             ]
@@ -76,7 +81,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // create a menu bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        setIcon(iconName: "tray.full.fill")
+        setIcon(icon: "tray.full.fill")
         
         initFeed()
     }
@@ -99,7 +104,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     // only add new items to the feed..
                     if !feeds[forFeed].entries.contains(where: { ae == $0.item }) {
                         hasUnread = true
-                        feeds[forFeed].entries.append(Entry(item: ae, parent: feeds[forFeed]))
+                        feeds[forFeed].entries.append(Entry(item: ae, parent: feeds[forFeed], id: entryID))
+                        entryID += 1
                     }
                 }
 
@@ -128,9 +134,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let feedSelector = NSMenu()
 
             for (i, feed) in feeds.enumerated() {
-                let feedEntry = NSMenuItem(title: "Placeholder", action: #selector(toggleFeedVisibility), keyEquivalent: "")
-                feedEntry.attributedTitle = NSAttributedString(string: feed.name)
-                feedEntry.title = String(i)
+                let feedEntry = NSMenuItem(title: feed.name, action: #selector(toggleFeedVisibility), keyEquivalent: "")
+                feedEntry.tag = i
                 feedEntry.state = feed.active ? NSControl.StateValue.on : NSControl.StateValue.off
                 feedSelector.addItem(feedEntry)
             }
@@ -149,6 +154,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             errMsg += "No URLs have been added!\nPlease set some in Preferences."
         } else if activeFeeds == 0 {
             errMsg += "No feeds are currently active!\nThey'll show up here if you make them visible."
+            setIcon(icon: "tray.fill") // jank
         } else {
             if daijoubujanai != "" {
                 errMsg += "Failed to fetch from one or more URLs:\n" + daijoubujanai
@@ -182,6 +188,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             hardRefresh.isAlternate = true
             hardRefresh.keyEquivalentModifierMask = [.option] //, .command]
 
+            if unreadClearing == 1 && hasUnread && showUnreadMarkers {
+                menu.addItem(NSMenuItem.separator())
+                menu.addItem(NSMenuItem(title: "Mark all as read", action: #selector(markAllRead), keyEquivalent: "m"))
+            }
+
             var allFeedEntries: [Entry] = []
             for feed in feeds {
                 if feed.active {
@@ -189,11 +200,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
             let sortedEntries = allFeedEntries.sorted(by: { $0.item.pubDate! > $1.item.pubDate! }) // sort by date
+            hasUnread = false
             for (i, entry) in sortedEntries.enumerated() {
                 if i+1 > maxEntries { break } // only add as many (active) entries as we want
+                if entry.unread { hasUnread = true }
+
                 menu.addItem(NSMenuItem.separator())
 
                 let entryItem = NSMenuItem(title: "Placeholder", action: #selector(entryClick), keyEquivalent: "")
+                entryItem.tag = entry.id
                 let attrstring = NSMutableAttributedString()
                 if activeFeeds > 1 && entry.parent.name != "Unknown feed name" { // && (dFTitle! || dFDesc!) ?
                     if miniTitles != 0 {
@@ -261,6 +276,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        if unreadClearing == 1 && !hasUnread && showUnreadMarkers { // I just wanted "mark as read" above the list :(
+            let index = menu.indexOfItem(withTitle: "Mark all as read")
+            if index != -1 {
+                menu.removeItem(at: index)
+            }
+        }
+
         if errMsg != "" {
             let err = NSMenuItem(title: "", action: nil, keyEquivalent: "")
             err.attributedTitle = NSAttributedString(string: errMsg) // attributed overrides title and lets us use \n
@@ -274,12 +296,36 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc func toggleFeedVisibility(_ sender: NSMenuItem) {
-        let index = Int(sender.title)!
+        let index = sender.tag
         feeds[index].active = !feeds[index].active // toggle
         createMenu()
+        setIcon()
+    }
+
+    @objc func markAllRead() {
+        for feed in feeds {
+            if feed.active { // only mark as read for active (visible) feeds
+                for entry in feed.entries {
+                    entry.unread = false
+                }
+            }
+        }
+        hasUnread = false
+        createMenu()
+        setIcon()
     }
 
     @objc func entryClick(_ sender: NSMenuItem) {
+        if unreadClearing == 1 { // clear on click
+            for feed in feeds {
+                if let entry = feed.entries.first(where: { $0.id == sender.tag }) {
+                    entry.unread = false
+                    createMenu()
+                    setIcon()
+                    break
+                }
+            }
+        }
         if sender.title == "" { return }
         openURL(url: sender.title)
     }
@@ -293,21 +339,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func reload(syncOverride: Bool) async {
         for (i, feed) in feeds.enumerated() {
             if (feed.url.absoluteString != "" && setURLs != lastURLs) || syncOverride {
-                setIcon(iconName: "tray.and.arrow.down.fill")
+                setIcon(icon: "tray.and.arrow.down.fill")
                 fetch(url: feed.url, forFeed: i)
             }
         }
         lastURLs = setURLs
 
         createMenu() // refresh the menu
-
-        if feeds.count == 0 {
-            setIcon(iconName: "slash.circle")
-        } else if daijoubujanai != "" {
-            setIcon(iconName: "xmark.circle")
-        } else {
-            setIcon(iconName: hasUnread ? "tray.full.fill" : "tray.fill")
-        }
+        setIcon()
     }
 
     // because calling an async function directly from the #selector causes a general protection fault :D
@@ -331,6 +370,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         dAuthor = ud.bool(forKey: "should_display_author")
 
         showUnreadMarkers = ud.bool(forKey: "should_mark_unread")
+        unreadClearing = ud.integer(forKey: "unread_clearing_option")
         showTooltips = ud.bool(forKey: "should_show_tooltips")
         dateTimeOption = ud.integer(forKey: "date_time_option")
         miniTitles = ud.integer(forKey: "minititles_position")
@@ -363,7 +403,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return storyboard.instantiateInitialController() as? NSWindowController
     }()
 
-    func setIcon(iconName: String) {
+    func setIcon(icon: String? = nil) {
+        var iconName = "tray.fill"
+        if icon == nil {
+            if feeds.count == 0 {
+                iconName = "slash.circle"
+            } else if daijoubujanai != "" {
+                iconName = "xmark.circle"
+            } else {
+                iconName = hasUnread ? "tray.full.fill" : "tray.fill"
+            }
+        } else {
+            iconName = icon!
+        }
         if let button = statusItem.button {
             DispatchQueue.main.async { // nsstaTUSbaRbutToN SetimAGe muSt be used fRom maiN tHrEad OnLY, so let's do that
                 button.image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Taberu")
@@ -379,21 +431,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 extension AppDelegate: NSMenuDelegate {
-    func menuWillOpen(_ menu: NSMenu) {
-        for feed in feeds {
-            if feed.active { // only mark as read for active (visible) feeds
-                for entry in feed.entries {
-                    entry.unread = false
-                }
-            }
-        }
-        if hasUnread && daijoubujanai == "" {
-            setIcon(iconName: "tray.fill")
-        }
-    }
+    func menuWillOpen(_ menu: NSMenu) { }
 
     func menuDidClose(_ menu: NSMenu) {
-        hasUnread = false
+        if unreadClearing == 0 && hasUnread { // clearing on view
+            markAllRead()
+        }
         createMenu()
     }
 }

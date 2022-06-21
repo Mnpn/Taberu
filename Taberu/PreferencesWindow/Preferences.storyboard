@@ -142,7 +142,7 @@
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <popUpButtonCell key="cell" type="push" title="in the centre" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="kzd-RB-pMB" id="nYR-5m-ddI">
                                                 <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                <font key="font" metaFont="system"/>
+                                                <font key="font" metaFont="menu"/>
                                                 <menu key="menu" id="zgz-Cn-NYE">
                                                     <items>
                                                         <menuItem title="nowhere" id="H6Q-OC-OJ5"/>
@@ -322,7 +322,7 @@
                                         <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QUw-6W-gtt">
                                             <rect key="frame" x="113" y="91" width="114" height="25"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <popUpButtonCell key="cell" type="push" title="viewed" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" enabled="NO" state="on" borderStyle="border" inset="2" selectedItem="3jy-m8-SCT" id="EDm-NU-UA4">
+                                            <popUpButtonCell key="cell" type="push" title="viewed" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" inset="2" selectedItem="3jy-m8-SCT" id="EDm-NU-UA4">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                 <font key="font" metaFont="menu"/>
                                                 <menu key="menu" id="5bZ-fk-a3X">
@@ -467,6 +467,7 @@
                         <outlet property="titleCheck" destination="EfN-3w-sV0" id="dWm-A6-mQx"/>
                         <outlet property="tooltipCheck" destination="z9c-gu-2bl" id="4BM-KD-x1i"/>
                         <outlet property="unreadCheck" destination="v9f-D9-O8c" id="idx-rL-nJ5"/>
+                        <outlet property="unreadClearOption" destination="QUw-6W-gtt" id="kPD-sJ-dvs"/>
                         <outlet property="versionLabel" destination="0U3-6F-Aju" id="8ar-87-WfC"/>
                     </connections>
                 </viewController>
