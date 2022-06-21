@@ -16,6 +16,7 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var titleCheck: NSButton!
     @IBOutlet weak var descCheck: NSButton!
     @IBOutlet weak var dateCheck: NSButton!
+    @IBOutlet weak var dateTimeOption: NSPopUpButton!
     @IBOutlet weak var authorCheck: NSButton!
     @IBOutlet weak var maxTextField: NSTextField!
     @IBOutlet weak var unreadCheck: NSButton!
@@ -42,6 +43,7 @@ class PreferencesViewController: NSViewController {
         tooltipCheck?.state = df.bool(forKey: "should_show_tooltips") ? NSControl.StateValue.on : NSControl.StateValue.off
         autoFetchCheck?.state = df.bool(forKey: "should_autofetch") ? NSControl.StateValue.on : NSControl.StateValue.off
 
+        dateTimeOption?.selectItem(at: df.integer(forKey: "date_time_option"))
         miniTitles?.selectItem(at: df.integer(forKey: "minititles_position"))
 
         let autoFetchTime = Int32(df.integer(forKey: "autofetch_time"))
@@ -94,6 +96,7 @@ class PreferencesViewController: NSViewController {
                forKey: "autofetch_time") // x*60^0 = minutes, x*60^1 = hours in minutes
         df.set(links, forKey: "feed_urls")
         df.set(Int(maxTextField.stringValue), forKey: "max_feed_entries")
+        df.set(dateTimeOption.indexOfSelectedItem, forKey: "date_time_option")
         df.set(miniTitles.indexOfSelectedItem, forKey: "minititles_position")
         
         let delegate = NSApplication.shared.delegate as! AppDelegate

@@ -47,6 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var showUnreadMarkers = true
     var hasUnread = false
     var showTooltips = true
+    var dateTimeOption = 0
     var miniTitles = 1
 
     var feeds: [Feed] = []
@@ -68,7 +69,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 "should_display_author": false,
                 "should_mark_unread": true,
                 "should_show_tooltips": true,
-                "minititles_position": 1
+                "date_time_option": 0, // both date & time
+                "minititles_position": 1 // to the left
             ]
         )
 
@@ -220,7 +222,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 if dDate! {
                     bottomField += dAuthor! ? " at " : ""
                     let dateFormatter = DateFormatter()
-                    dateFormatter.dateFormat = "y-MM-d"
+                    switch dateTimeOption {
+                        case 0: dateFormatter.dateFormat = "y-MM-d HH:mm:ss"
+                        case 1: dateFormatter.dateFormat = "y-MM-d"
+                        case 2: dateFormatter.dateFormat = "HH:mm:ss"
+                        default: assertionFailure("Hit an unknown date & time option")
+                    }
                     bottomField += dateFormatter.string(from: entry.item.pubDate!)
                 }
                 if dDesc! {
@@ -317,6 +324,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         showUnreadMarkers = ud.bool(forKey: "should_mark_unread")
         showTooltips = ud.bool(forKey: "should_show_tooltips")
+        dateTimeOption = ud.integer(forKey: "date_time_option")
         miniTitles = ud.integer(forKey: "minititles_position")
 
         setURLs = (ud.array(forKey: "feed_urls") ?? []) as? [String] ?? []
