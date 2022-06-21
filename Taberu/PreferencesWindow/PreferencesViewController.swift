@@ -70,6 +70,7 @@ class PreferencesViewController: NSViewController {
 
         URLTableView.dataSource = self
         URLTableView.delegate = self
+        linkAddRemove.setEnabled(URLTableView.selectedRow != -1, forSegment: 1)
 
         self.preferredContentSize = NSMakeSize(550, 500)
     }

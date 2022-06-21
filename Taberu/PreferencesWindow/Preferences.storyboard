@@ -208,7 +208,7 @@
                                         <textField verticalHuggingPriority="750" fixedFrame="YES" preferredMaxLayoutWidth="38" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xGO-Ye-cTJ">
                                             <rect key="frame" x="116" y="185" width="45" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="border" alignment="center" title="10" placeholderString="10" drawsBackground="YES" usesSingleLineMode="YES" id="BTf-l3-Lfu">
+                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" refusesFirstResponder="YES" sendsActionOnEndEditing="YES" borderStyle="border" alignment="center" title="10" placeholderString="10" drawsBackground="YES" usesSingleLineMode="YES" id="BTf-l3-Lfu">
                                                 <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -301,7 +301,7 @@
                                         <textField verticalHuggingPriority="750" fixedFrame="YES" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2Mt-oL-0t2">
                                             <rect key="frame" x="78" y="21" width="40" height="20"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="border" alignment="center" title="1" placeholderString="1" drawsBackground="YES" usesSingleLineMode="YES" id="aCV-gJ-MLb">
+                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" refusesFirstResponder="YES" sendsActionOnEndEditing="YES" borderStyle="border" alignment="center" title="1" placeholderString="1" drawsBackground="YES" usesSingleLineMode="YES" id="aCV-gJ-MLb">
                                                 <font key="font" metaFont="system"/>
                                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
