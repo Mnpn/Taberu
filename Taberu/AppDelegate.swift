@@ -203,12 +203,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         entryItem.toolTip = "From \"" + entry.parent.name + ((entry.item.link != nil) ? "\"\nClick to visit page." : "\"")
                     }
                 }
-                if showUnreadMarkers && entry.unread {
-                    attrstring.append(NSMutableAttributedString(string: "◉ ", attributes: [NSAttributedString.Key.foregroundColor: NSColor.systemRed]))
+                let unread = showUnreadMarkers && entry.unread
+                if unread {
+                    // baseline is NSFont.systemFont(ofSize: 13, weight: .heavy).capHeight - NSFont.systemFont(ofSize: 7).capHeight) / 2
+                    attrstring.append(NSMutableAttributedString(string: "●  ", attributes:
+                                                                    [NSAttributedString.Key.foregroundColor: NSColor.controlAccentColor, NSAttributedString.Key.font: NSFont.systemFont(ofSize: 7), NSAttributedString.Key.baselineOffset: 2.113]))
                 }
-                attrstring.append(NSMutableAttributedString(string: (dTitle! ? (entry.item.title ?? "Unknown title") : "")))
+                attrstring.append(NSMutableAttributedString(string: (dTitle! ? (entry.item.title ?? "Unknown title") : ""),
+                    attributes: [NSAttributedString.Key.font: NSFont.systemFont(ofSize: 13, weight: unread ? .heavy : .regular)]))
 
-                var bottomField = ""
+                var bottomField = (unread && dTitle!) ? "   " : ""
                 if dAuthor! {
                     let author = entry.item.author ?? "Unknown author"
                     bottomField += author
