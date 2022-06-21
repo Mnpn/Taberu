@@ -166,7 +166,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         infoString.append(NSMutableAttributedString(string: feeds[lastActiveFeed].name))
                     }
                     if dFDesc! {
-                        infoString.append(NSMutableAttributedString(string: dFTitle! ? "\n" : "" + feeds[lastActiveFeed].desc))
+                        infoString.append(NSMutableAttributedString(string: (dFTitle! ? "\n" : "") + feeds[lastActiveFeed].desc))
                     }
                     info.attributedTitle = infoString
                     menu.addItem(info)
@@ -246,8 +246,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     bottomField += dAuthor! ? " at " : ""
                     let dateFormatter = DateFormatter()
                     switch dateTimeOption {
-                        case 0: dateFormatter.dateFormat = "y-MM-d HH:mm:ss"
-                        case 1: dateFormatter.dateFormat = "y-MM-d"
+                        case 0: dateFormatter.dateFormat = "y-MM-dd HH:mm:ss"
+                        case 1: dateFormatter.dateFormat = "y-MM-dd"
                         case 2: dateFormatter.dateFormat = "HH:mm:ss"
                         default: assertionFailure("Hit an unknown date & time option")
                     }
