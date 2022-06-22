@@ -16,6 +16,7 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var titleCheck: NSButton!
     @IBOutlet weak var descCheck: NSButton!
     @IBOutlet weak var dateCheck: NSButton!
+    @IBOutlet weak var wrapTrimOption: NSPopUpButton!
     @IBOutlet weak var dateTimeOption: NSPopUpButton!
     @IBOutlet weak var authorCheck: NSButton!
     @IBOutlet weak var maxTextField: NSTextField!
@@ -46,6 +47,7 @@ class PreferencesViewController: NSViewController {
 
         unreadClearOption?.selectItem(at: df.integer(forKey: "unread_clearing_option"))
         dateTimeOption?.selectItem(at: df.integer(forKey: "date_time_option"))
+        wrapTrimOption?.selectItem(at: df.integer(forKey: "wrap_trim_option"))
         miniTitles?.selectItem(at: df.integer(forKey: "minititles_position"))
 
         let autoFetchTime = Int32(df.integer(forKey: "autofetch_time"))
@@ -101,6 +103,7 @@ class PreferencesViewController: NSViewController {
         df.set(Int(maxTextField.stringValue), forKey: "max_feed_entries")
         df.set(unreadClearOption.indexOfSelectedItem, forKey: "unread_clearing_option")
         df.set(dateTimeOption.indexOfSelectedItem, forKey: "date_time_option")
+        df.set(wrapTrimOption.indexOfSelectedItem, forKey: "wrap_trim_option")
         df.set(miniTitles.indexOfSelectedItem, forKey: "minititles_position")
         
         let delegate = NSApplication.shared.delegate as! AppDelegate

@@ -56,6 +56,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var feeds: [Feed] = []
     var maxEntries = 10
+    var maxDescLength = 86 // characters
+    var wrapTrimOption = 0
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // set default UserDefaults if they do not exist
@@ -75,6 +77,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 "should_show_tooltips": true,
                 "unread_clearing_option": 0, // on view
                 "date_time_option": 0, // both date & time
+                "wrap_trim_option": 0, // wrap
                 "minititles_position": 1 // to the left
             ]
         )
@@ -149,6 +152,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if feed.active { activeFeeds += 1; lastActiveFeed = i }
         }
 
+        var hasInvisEntries = false
         var errMsg = ""
         if feeds.count == 0 {
             errMsg += "No URLs have been added!\nPlease set some in Preferences."
@@ -199,11 +203,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     allFeedEntries.append(contentsOf: feed.entries)
                 }
             }
-            let sortedEntries = allFeedEntries.sorted(by: { $0.item.pubDate! > $1.item.pubDate! }) // sort by date
+            let sortedEntries = allFeedEntries.sorted(by: { $0.item.pubDate ?? Date.now > $1.item.pubDate ?? Date.now }) // sort by date
             hasUnread = false
             for (i, entry) in sortedEntries.enumerated() {
                 if i+1 > maxEntries { break } // only add as many (active) entries as we want
                 if entry.unread { hasUnread = true }
+                let showDate = dDate! && entry.item.pubDate != nil
 
                 menu.addItem(NSMenuItem.separator())
 
@@ -225,7 +230,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                              .paragraphStyle: paragraph]))
                     }
                     if showTooltips {
-                        entryItem.toolTip = "From \"" + entry.parent.name + ((entry.item.link != nil) ? "\"\nClick to visit page." : "\"")
+                        entryItem.toolTip = "From \"" + entry.parent.name + "\"\n\"" + (entry.item.description ?? "No description") + "\"" + (entry.item.link != nil ? "\nClick to visit page." : "\"")
                     }
                 }
                 let unread = showUnreadMarkers && entry.unread
@@ -242,7 +247,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     let author = entry.item.author ?? "Unknown author"
                     bottomField += author
                 }
-                if dDate! {
+                if showDate {
                     bottomField += dAuthor! ? " at " : ""
                     let dateFormatter = DateFormatter()
                     switch dateTimeOption {
@@ -254,26 +259,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     bottomField += dateFormatter.string(from: entry.item.pubDate!)
                 }
                 if dDesc! {
-                    bottomField += (dDate! || dAuthor!) ? ": " : ""
-                    bottomField += entry.item.description ?? "Unknown description"
+                    let desc = entry.item.description ?? "No description"
+                    bottomField += (showDate || dAuthor!) ? ": " : ""
+                    if wrapTrimOption == 0 { // wrap
+                        bottomField += textWrap(preExisting: bottomField, new: desc, unread: unread)
+                    } else if wrapTrimOption == 1 { // trim
+                        bottomField += desc.count > maxDescLength ? String(desc.prefix(maxDescLength)) + "…" : desc
+                    } else { // do nothing special
+                        bottomField += desc
+                    }
                 }
 
-                if dDate! || dDesc! || dAuthor! {
+                if showDate || dDesc! || dAuthor! {
                     attrstring.append(NSMutableAttributedString(string: (dTitle! ? "\n" : "") + bottomField, attributes:
                                     [NSAttributedString.Key.foregroundColor: NSColor.darkGray,
                                      NSAttributedString.Key.font: NSFont.systemFont(ofSize: 12)]))
                 }
 
-                if dTitle! || dAuthor! || dDesc! || dDate! {
+                if dTitle! || dAuthor! || dDesc! || showDate {
                     entryItem.attributedTitle = attrstring
                     // store the link in the title (attr overrides the content), this lets us fetch it on click events later
                     entryItem.title = String(entry.item.link ?? "")
                     menu.addItem(entryItem)
                 } else {
-                    menu.addItem(NSMenuItem(title: "A feed is loaded, but you're not displaying any of it!", action: nil, keyEquivalent: ""))
-                    break // don't make more than one of these please
+                    hasInvisEntries = true
                 }
             }
+        }
+
+        if hasInvisEntries {
+            let nonDisplayedEntries = NSMenuItem(title: "Placeholder", action: nil, keyEquivalent: "")
+            nonDisplayedEntries.attributedTitle = NSAttributedString(string: "One or more entries are hidden because they lack\ninfo to display with your currently set preferences.")
+            menu.addItem(nonDisplayedEntries)
         }
 
         if unreadClearing == 1 && !hasUnread && showUnreadMarkers { // I just wanted "mark as read" above the list :(
@@ -373,6 +390,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         unreadClearing = ud.integer(forKey: "unread_clearing_option")
         showTooltips = ud.bool(forKey: "should_show_tooltips")
         dateTimeOption = ud.integer(forKey: "date_time_option")
+        wrapTrimOption = ud.integer(forKey: "wrap_trim_option")
         miniTitles = ud.integer(forKey: "minititles_position")
 
         setURLs = (ud.array(forKey: "feed_urls") ?? []) as? [String] ?? []
@@ -380,7 +398,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             feeds = []
             for var url in setURLs {
                 url = url.filter {!$0.isWhitespace} // space in "New link" causes unwrap crash
-                feeds.append(Feed(url: URL(string: url)!, active: true))
+                feeds.append(Feed(url: (URL(string: url) ?? URL(string: "whitespace"))!, active: true))
             }
         }
 
@@ -421,6 +439,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 button.image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Taberu")
             }
         }
+    }
+
+    func textWrap(preExisting: String, new: String, unread: Bool) -> String { // word wrap mess :(
+        // Q: "Why?", A: NSAttributedStrings can have NSParagraphStyles which have wrapping settings,
+        // but you cannot set a max width on an NSMenu, so they're half useless.
+        let lines = NSString(string: new).components(separatedBy: " ") // split string by space, sorry in advance of your language doesn't use them! consider using description trimming instead.
+        var biglines: [String] = []
+        var current = ""
+        for line in lines {
+            current += line + " "
+            if current.count > ((biglines.count > 0) ? maxDescLength : maxDescLength-preExisting.count) {
+                biglines.append(current)
+                current = ""
+            }
+        }
+        if current.filter({!$0.isWhitespace}) != "" { biglines.append(current) } // add what's left unless empty
+        var finalLine = ""
+        for (i, bigline) in biglines.enumerated() {
+            finalLine += (i != 0 ? "\n" : "") + ((unread && dTitle!) && i != 0 ? "   " : "") + bigline
+        }
+        return finalLine
     }
 
     func applicationWillTerminate(_ aNotification: Notification) { }
