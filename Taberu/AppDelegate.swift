@@ -96,32 +96,57 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let result = parser.parse()
         switch result {
         case .success(let feed):
+            var finalFeed: [RSSFeedItem] = [] // JSON & Atom feeds will also be stores as RSS items
             switch feed {
             case let .atom(feed):
-                for _ in feed.entries ?? [] {}
-            case let .rss(feed):
-                feeds[forFeed].name = feed.title ?? "Unknown title"
-                feeds[forFeed].desc = feed.description ?? "Unknown description"
-                let feedItems = feed.items ?? []
-                for ae in feedItems {
-                    // only add new items to the feed..
-                    if !feeds[forFeed].entries.contains(where: { ae == $0.item }) {
-                        hasUnread = true
-                        feeds[forFeed].entries.append(Entry(item: ae, parent: feeds[forFeed], id: entryID))
-                        entryID += 1
-                    }
+                feeds[forFeed].name = feed.title ?? "Unknown Atom feed title"
+                feeds[forFeed].desc = feed.subtitle?.value ?? "This Atom feed does not have a description"
+                for ai in feed.entries ?? [] {
+                    let rssFI = RSSFeedItem.init()
+                    rssFI.title = ai.title
+                    rssFI.description = ai.summary?.value
+                    rssFI.pubDate = ai.updated ?? ai.published
+                    rssFI.author = ai.authors?.first?.name
+                    rssFI.link = ai.links?.first?.attributes?.href
+                    finalFeed.append(rssFI)
                 }
-
-                // ..but let's make sure to delete anything which is no longer present
-                for entry in feeds[forFeed].entries {
-                    if !feedItems.contains(where: { entry.item == $0 }) {
-                        feeds[forFeed].entries.removeAll(where: { entry.item == $0.item })
-                    }
+            case let .rss(feed):
+                feeds[forFeed].name = feed.title ?? "Unknown RSS feed title"
+                feeds[forFeed].desc = feed.description ?? "This RSS feed does not have a description"
+                for ri in feed.items ?? [] {
+                    ri.pubDate = ri.dublinCore?.dcDate ?? ri.pubDate
+                    finalFeed.append(ri)
                 }
             case let .json(feed):
-                for _ in feed.items ?? [] {}
+                feeds[forFeed].name = feed.title ?? "Unknown JSON feed title"
+                feeds[forFeed].desc = feed.description ?? "This JSON feed does not have a description"
+                for ji in feed.items ?? [] {
+                    let rssFI = RSSFeedItem.init()
+                    rssFI.title = ji.title
+                    rssFI.description = ji.contentText ?? ji.contentHtml
+                    rssFI.pubDate = ji.dateModified ?? ji.datePublished
+                    rssFI.author = ji.author?.name
+                    rssFI.link = ji.url
+                    finalFeed.append(rssFI)
+                }
             }
-            
+
+            for ae in finalFeed {
+                // only add new items to the feed..
+                if !feeds[forFeed].entries.contains(where: { ae == $0.item }) {
+                    hasUnread = true
+                    feeds[forFeed].entries.append(Entry(item: ae, parent: feeds[forFeed], id: entryID))
+                    entryID += 1
+                }
+            }
+
+            // ..but let's make sure to delete anything which is no longer present
+            for entry in feeds[forFeed].entries {
+                if !finalFeed.contains(where: { entry.item == $0 }) {
+                    feeds[forFeed].entries.removeAll(where: { entry.item == $0.item })
+                }
+            }
+
         case .failure(let error):
             print(error)
             daijoubujanai = error.localizedDescription
@@ -209,6 +234,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 if i+1 > maxEntries { break } // only add as many (active) entries as we want
                 if entry.unread { hasUnread = true }
                 let showDate = dDate! && entry.item.pubDate != nil
+                let showDesc = dDesc! && entry.item.description != nil && entry.item.description!.filter({ !$0.isWhitespace }) != ""
 
                 menu.addItem(NSMenuItem.separator())
 
@@ -229,9 +255,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                             NSAttributedString.Key.font: NSFont.systemFont(ofSize: 10),
                              .paragraphStyle: paragraph]))
                     }
-                    if showTooltips {
-                        entryItem.toolTip = "From \"" + entry.parent.name + "\"\n\"" + (entry.item.description ?? "No description") + "\"" + (entry.item.link != nil ? "\nClick to visit page." : "\"")
-                    }
+                }
+                if showTooltips {
+                    var tooltip = "From \"" + entry.parent.name + "\"\n"
+                    tooltip += entry.item.description != nil ? ("\nDescription:\n\"" + entry.item.description! + "\"\n") : ""
+                    tooltip += entry.item.link != nil ? "\nClick to visit page." : "\""
+                    entryItem.toolTip = tooltip
                 }
                 let unread = showUnreadMarkers && entry.unread
                 if unread {
@@ -258,7 +287,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     }
                     bottomField += dateFormatter.string(from: entry.item.pubDate!)
                 }
-                if dDesc! {
+                if showDesc {
                     let desc = entry.item.description ?? "No description"
                     bottomField += (showDate || dAuthor!) ? ": " : ""
                     if wrapTrimOption == 0 { // wrap
@@ -270,13 +299,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     }
                 }
 
-                if showDate || dDesc! || dAuthor! {
+                if showDate || showDesc || dAuthor! {
                     attrstring.append(NSMutableAttributedString(string: (dTitle! ? "\n" : "") + bottomField, attributes:
                                     [NSAttributedString.Key.foregroundColor: NSColor.darkGray,
                                      NSAttributedString.Key.font: NSFont.systemFont(ofSize: 12)]))
                 }
 
-                if dTitle! || dAuthor! || dDesc! || showDate {
+                if dTitle! || dAuthor! || showDesc || showDate {
                     entryItem.attributedTitle = attrstring
                     // store the link in the title (attr overrides the content), this lets us fetch it on click events later
                     entryItem.title = String(entry.item.link ?? "")
@@ -444,7 +473,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func textWrap(preExisting: String, new: String, unread: Bool) -> String { // word wrap mess :(
         // Q: "Why?", A: NSAttributedStrings can have NSParagraphStyles which have wrapping settings,
         // but you cannot set a max width on an NSMenu, so they're half useless.
-        let lines = NSString(string: new).components(separatedBy: " ") // split string by space, sorry in advance of your language doesn't use them! consider using description trimming instead.
+        let lines = NSString(string: new).components(separatedBy: .whitespacesAndNewlines) // split string by space, sorry in advance of your language doesn't use them! consider using description trimming instead.
         var biglines: [String] = []
         var current = ""
         for line in lines {
@@ -455,6 +484,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         if current.filter({!$0.isWhitespace}) != "" { biglines.append(current) } // add what's left unless empty
+        if biglines.count > 8 { biglines = Array(biglines[..<8]); biglines[7] += "…" } // limit lines too
         var finalLine = ""
         for (i, bigline) in biglines.enumerated() {
             finalLine += (i != 0 ? "\n" : "") + ((unread && dTitle!) && i != 0 ? "   " : "") + bigline
