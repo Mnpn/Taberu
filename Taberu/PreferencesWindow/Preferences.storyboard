@@ -97,7 +97,7 @@
                                 <rect key="frame" x="32" y="221" width="487" height="5"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                             </box>
-                            <box fixedFrame="YES" title="Feed entries should display:" translatesAutoresizingMaskIntoConstraints="NO" id="NIZ-8P-C3D">
+                            <box fixedFrame="YES" title="Feed entries should display their:" translatesAutoresizingMaskIntoConstraints="NO" id="NIZ-8P-C3D">
                                 <rect key="frame" x="283" y="228" width="250" height="170"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <view key="contentView" id="biN-vC-dXc">
@@ -186,7 +186,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="671-mS-HlH">
-                                            <rect key="frame" x="125" y="85" width="103" height="25"/>
+                                            <rect key="frame" x="122" y="85" width="106" height="25"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <popUpButtonCell key="cell" type="push" title="wrapped" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="gdJ-2D-NQ7" id="8nd-Ul-hny">
                                                 <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -266,7 +266,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dCw-5z-y9q">
-                                            <rect key="frame" x="18" y="46" width="209" height="18"/>
+                                            <rect key="frame" x="18" y="43" width="209" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="Automatically refresh content:" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="rog-lT-13L">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -358,10 +358,10 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MVD-Vu-fk2">
-                                            <rect key="frame" x="38" y="78" width="165" height="14"/>
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UrB-DA-2U8">
+                                            <rect key="frame" x="38" y="63" width="191" height="29"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" lineBreakMode="clipping" title="They also contain descriptions" id="R16-wR-lkd">
+                                            <textFieldCell key="cell" title="They contain entries' descriptions, regardless of their set visibility." id="dAx-AU-lag">
                                                 <font key="font" metaFont="system" size="11"/>
                                                 <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -444,17 +444,17 @@
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OVm-DA-h2D">
-                                            <rect key="frame" x="18" y="16" width="62" height="18"/>
+                                            <rect key="frame" x="18" y="16" width="68" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Name" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="XbQ-Qw-mMQ">
+                                            <buttonCell key="cell" type="check" title="Names" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="XbQ-Qw-mMQ">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mfQ-Jh-uM3">
-                                            <rect key="frame" x="127" y="16" width="96" height="18"/>
+                                            <rect key="frame" x="121" y="16" width="103" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Description" bezelStyle="regularSquare" imagePosition="left" inset="2" id="LDB-3s-O3X">
+                                            <buttonCell key="cell" type="check" title="Descriptions" bezelStyle="regularSquare" imagePosition="left" inset="2" id="LDB-3s-O3X">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
