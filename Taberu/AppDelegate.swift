@@ -228,7 +228,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     allFeedEntries.append(contentsOf: feed.entries)
                 }
             }
-            let sortedEntries = allFeedEntries.sorted(by: { $0.item.pubDate ?? Date.now > $1.item.pubDate ?? Date.now }) // sort by date
+            let sortedEntries = allFeedEntries.sorted(by: { $0.item.pubDate ?? Date.init() > $1.item.pubDate ?? Date.init() }) // sort by date
             hasUnread = false
             for (i, entry) in sortedEntries.enumerated() {
                 if i+1 > maxEntries { break } // only add as many (active) entries as we want
