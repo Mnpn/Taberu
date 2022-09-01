@@ -448,7 +448,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         setURLs = (ud.array(forKey: "feed_urls") ?? []) as? [String] ?? []
         deliverNotifications = (ud.array(forKey: "feed_notifications") ?? []) as? [Bool] ?? []
-        assert(setURLs.count == deliverNotifications.count) // mismatch here is bad
+        if setURLs.count != deliverNotifications.count { // mismatch here is certain if upgrading from an older version
+            deliverNotifications = [Bool](repeating: false, count: setURLs.count)
+            ud.set(deliverNotifications, forKey: "feed_notifications") // save this change to not break preferences
+        }
         if setURLs != lastURLs {
             feeds = []
             for (i, var url) in setURLs.enumerated() {
