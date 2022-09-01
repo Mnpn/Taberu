@@ -7,12 +7,14 @@
 
 import Cocoa
 import FeedKit
+import UserNotifications
 
 class Entry {
     let item: RSSFeedItem
     let parent: Feed
     let id: Int
     var unread: Bool = true
+    var notified: Bool = false
 
     init(item: RSSFeedItem, parent: Feed, id: Int) {
         self.item = item
@@ -24,23 +26,26 @@ class Entry {
 class Feed {
     let url: URL
     var active: Bool
+    var notify: Bool
     var entries: [Entry] = []
     var name = "Unknown feed name"
     var desc = "Unknown feed description"
 
-    init(url: URL, active: Bool) {
+    init(url: URL, active: Bool, notify: Bool) {
         self.url = url
         self.active = active
+        self.notify = notify
     }
 }
 
 @main
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     private var statusItem: NSStatusItem!
     var preferencesController: NSWindowController?
 
     var entryID = 0
     var daijoubujanai = ""
+    var fromAF = false
 
     var autoFetch: Bool?
     var autoFetchTime: Int?
@@ -48,6 +53,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var dFTitle, dFDesc, dTitle, dDesc, dDate, dAuthor: Bool?
     var showUnreadMarkers = true
+    var deliverNotifications: [Bool] = []
     var unreadClearing = 0
     var hasUnread = false
     var showTooltips = true
@@ -64,6 +70,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.register(
             defaults: [
                 "feed_urls": [],
+                "feed_notifications": [],
                 "max_feed_entries": 10,
                 "autofetch_time": 60, // minutes
                 "should_autofetch": true,
@@ -87,6 +94,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setIcon(icon: "tray.full.fill")
         
         initFeed()
+        UNUserNotificationCenter.current().delegate = self
     }
 
     func fetch(url: URL, forFeed: Int) {
@@ -230,9 +238,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             let sortedEntries = allFeedEntries.sorted(by: { $0.item.pubDate ?? Date.init() > $1.item.pubDate ?? Date.init() }) // sort by date
             hasUnread = false
+            var unnotified: [Entry] = []
             for (i, entry) in sortedEntries.enumerated() {
                 if i+1 > maxEntries { break } // only add as many (active) entries as we want
                 if entry.unread { hasUnread = true }
+                if entry.unread && !entry.notified && entry.parent.active && entry.parent.notify { // if not unread it will never notify
+                    unnotified.append(entry)
+                    entry.notified = true // this also means that viewed (but not yet read) won't sent notifications on the next autofetch
+                }
                 let showDate = dDate! && entry.item.pubDate != nil
                 let showDesc = dDesc! && entry.item.description != nil && entry.item.description!.filter({ !$0.isWhitespace }) != ""
 
@@ -313,6 +326,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 } else {
                     hasInvisEntries = true
                 }
+            }
+
+            if hasUnread && deliverNotifications.contains(true) && fromAF && unnotified.count > 0 {
+                if unnotified.count > 1 {
+                    sendNotification(title: "Taberu", sub: "", desc: "There are " + String(unnotified.count) + " new entries.")
+                } else {
+                    sendNotification(title: (miniTitles != 0 && activeFeeds > 1) ? unnotified[0].parent.name : "",
+                                     sub: unnotified[0].item.title ?? "There is one new entry.",
+                                     desc: dDesc! ? (unnotified[0].item.description ?? "") : "")
+                    // show the feed title here too, but only if the minititles are on. reasoning:
+                    // if you only have one feed (and as such no minititles), you don't need to know where it's from.
+                    // if you have several but don't have minititles on, you probably don't care about the source anyways.
+                }
+                fromAF = false
             }
         }
 
@@ -423,11 +450,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         miniTitles = ud.integer(forKey: "minititles_position")
 
         setURLs = (ud.array(forKey: "feed_urls") ?? []) as? [String] ?? []
+        deliverNotifications = (ud.array(forKey: "feed_notifications") ?? []) as? [Bool] ?? []
+        assert(setURLs.count == deliverNotifications.count) // mismatch here is bad
         if setURLs != lastURLs {
             feeds = []
-            for var url in setURLs {
+            for (i, var url) in setURLs.enumerated() {
                 url = url.filter {!$0.isWhitespace} // space in "New link" causes unwrap crash
-                feeds.append(Feed(url: (URL(string: url) ?? URL(string: "whitespace"))!, active: true))
+                feeds.append(Feed(url: (URL(string: url) ?? URL(string: "whitespace"))!, active: true, notify: deliverNotifications[i]))
             }
         }
 
@@ -436,7 +465,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         autoFetchTimer?.invalidate()
         if autoFetch! {
             autoFetchTimer = Timer.scheduledTimer(withTimeInterval: Double(autoFetchTime!) * 60.0, repeats: true) { timer in
-                Task { await self.reload(syncOverride: true) }
+                Task { self.fromAF = true; await self.reload(syncOverride: true) }
             }
         }
     }
@@ -497,10 +526,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
         return true
     }
+
+    let un = UNUserNotificationCenter.current() // todo, fix: notifications from manual reload are not sent, and will be picked up by next autofetch. this sucks
+    func sendNotification(title: String, sub: String, desc: String) {
+        un.requestAuthorization(options: [.alert]) { (authorised, error) in // todo: handle error maybe
+            if authorised {
+                self.un.getNotificationSettings { settings in
+                    let content = UNMutableNotificationContent()
+                    content.title = title
+                    content.subtitle = sub
+                    content.body = desc
+                    let request = UNNotificationRequest(identifier: String(self.entryID), content: content, trigger: UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false))
+                    self.un.add(request) { error in
+                        if error != nil { print(error?.localizedDescription as Any) }
+                    }
+                }
+            }
+        }
+    }
 }
 
 extension AppDelegate: NSMenuDelegate {
-    func menuWillOpen(_ menu: NSMenu) { }
+    func menuWillOpen(_ menu: NSMenu) {
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications() // remove all notifications. todo: consider keeping unread?
+    }
 
     func menuDidClose(_ menu: NSMenu) {
         if unreadClearing == 0 && hasUnread { // clearing on view

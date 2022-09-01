@@ -32,6 +32,7 @@ class PreferencesViewController: NSViewController {
     
     let df = UserDefaults.standard
     var links: [String] = []
+    var notify: [Bool] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,6 +57,7 @@ class PreferencesViewController: NSViewController {
         autoFetchUnit?.selectItem(at: isMinute ? 0 : 1)
 
         links = df.array(forKey: "feed_urls") as! [String]
+        notify = df.array(forKey: "feed_notifications") as! [Bool]
         maxTextField?.stringValue = String(df.integer(forKey: "max_feed_entries"))
         
         // https://stackoverflow.com/questions/3015796
@@ -100,6 +102,7 @@ class PreferencesViewController: NSViewController {
         df.set(autoFetchTextField.intValue * Int32(pow(60.0, Double(autoFetchUnit.indexOfSelectedItem))),
                forKey: "autofetch_time") // x*60^0 = minutes, x*60^1 = hours in minutes
         df.set(links, forKey: "feed_urls")
+        df.set(notify, forKey: "feed_notifications")
         df.set(Int(maxTextField.stringValue), forKey: "max_feed_entries")
         df.set(unreadClearOption.indexOfSelectedItem, forKey: "unread_clearing_option")
         df.set(dateTimeOption.indexOfSelectedItem, forKey: "date_time_option")
