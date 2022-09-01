@@ -116,11 +116,13 @@ class PreferencesViewController: NSViewController {
     @IBAction func addRemoveURL(_ sender: NSSegmentedControl) {
         if sender.selectedSegment == 0 { // +
             links.append("New link")
+            notify.append(false) // default notification checkbox status is unticked
             URLTableView.reloadData()
             URLTableView.editColumn(0, row: links.count-1, with: nil, select: true) // newest will always be at the bottom
         } else if sender.selectedSegment == 1 { // -
             if URLTableView.selectedRow > -1 {
                 links.remove(at: URLTableView.selectedRow)
+                notify.remove(at: URLTableView.selectedRow)
                 URLTableView.reloadData()
                 linkAddRemove.setEnabled(URLTableView.selectedRow != -1, forSegment: 1)
             }
@@ -141,18 +143,26 @@ extension PreferencesViewController: NSTableViewDelegate, NSTableViewDataSource,
     }
 
     func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
-        guard links.count > row else { return nil }
-        return links[row]
+        guard links.count > row && notify.count > row else { return nil }
+        if tableColumn?.identifier.rawValue == "links" {
+            return links[row]
+        } else if tableColumn?.identifier.rawValue == "notifications" {
+            return notify[row]
+        }
+        return nil
     }
 
     func tableView(_ tableView: NSTableView, setObjectValue object: Any?, for tableColumn: NSTableColumn?, row: Int) {
-        guard let value = object as? String else { return }
-        guard !value.isEmpty else {
+        guard object != nil else {
             print("moshi moshi? there's an empty value here")
             return
         }
-        guard links.count > row else { return }
-        links[row] = value
+        guard links.count > row && notify.count > row else { return }
+        if tableColumn?.identifier.rawValue == "links" {
+            links[row] = (object as? String)!
+        } else if tableColumn?.identifier.rawValue == "notifications" {
+            notify[row] = object as? Int == 1
+        }
     }
 
     func tableViewSelectionDidChange(_ notification: Notification) {
@@ -168,6 +178,7 @@ extension PreferencesViewController: NSTableViewDelegate, NSTableViewDataSource,
         if event.charactersIgnoringModifiers == String(Character(UnicodeScalar(NSDeleteCharacter)!)) {
             if URLTableView.selectedRow > -1 {
                 links.remove(at: URLTableView.selectedRow)
+                notify.remove(at: URLTableView.selectedRow)
                 URLTableView.reloadData()
             }
         }

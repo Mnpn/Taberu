@@ -332,12 +332,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 if unnotified.count > 1 {
                     sendNotification(title: "Taberu", sub: "", desc: "There are " + String(unnotified.count) + " new entries.")
                 } else {
-                    sendNotification(title: (miniTitles != 0 && activeFeeds > 1) ? unnotified[0].parent.name : "",
+                    sendNotification(title: unnotified[0].parent.name,
                                      sub: unnotified[0].item.title ?? "There is one new entry.",
                                      desc: dDesc! ? (unnotified[0].item.description ?? "") : "")
-                    // show the feed title here too, but only if the minititles are on. reasoning:
-                    // if you only have one feed (and as such no minititles), you don't need to know where it's from.
-                    // if you have several but don't have minititles on, you probably don't care about the source anyways.
                 }
                 fromAF = false
             }
@@ -527,9 +524,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         return true
     }
 
-    let un = UNUserNotificationCenter.current() // todo, fix: notifications from manual reload are not sent, and will be picked up by next autofetch. this sucks
+    let un = UNUserNotificationCenter.current()
     func sendNotification(title: String, sub: String, desc: String) {
-        un.requestAuthorization(options: [.alert]) { (authorised, error) in // todo: handle error maybe
+        un.requestAuthorization(options: [.alert]) { (authorised, error) in
             if authorised {
                 self.un.getNotificationSettings { settings in
                     let content = UNMutableNotificationContent()
@@ -548,7 +545,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
 extension AppDelegate: NSMenuDelegate {
     func menuWillOpen(_ menu: NSMenu) {
-        UNUserNotificationCenter.current().removeAllDeliveredNotifications() // remove all notifications. todo: consider keeping unread?
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
     }
 
     func menuDidClose(_ menu: NSMenu) {
