@@ -536,7 +536,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                     content.title = title
                     content.subtitle = sub
                     content.body = desc
-                    let request = UNNotificationRequest(identifier: String(self.entryID), content: content, trigger: UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false))
+                    let request = UNNotificationRequest(identifier: String(self.entryID), content: content, trigger: nil)
                     self.un.add(request) { error in
                         if error != nil { print(error?.localizedDescription as Any) }
                     }
