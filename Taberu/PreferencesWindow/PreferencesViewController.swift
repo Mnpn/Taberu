@@ -33,7 +33,8 @@ class PreferencesViewController: NSViewController {
     let df = UserDefaults.standard
     var links: [String] = []
     var notify: [Bool] = []
-    
+    var active: [Bool] = []
+
     override func viewDidLoad() {
         super.viewDidLoad()
         feedTitleCheck?.state = df.bool(forKey: "should_display_feed_title") ? NSControl.StateValue.on : NSControl.StateValue.off
@@ -80,15 +81,17 @@ class PreferencesViewController: NSViewController {
 
         self.preferredContentSize = NSMakeSize(550, 500)
     }
-    
+
     override func viewDidAppear() {
         super.viewDidAppear()
+        active = df.array(forKey: "feed_active") as! [Bool] // has to load every time the window opens
+        URLTableView.reloadData()
         view.window!.styleMask.remove(.resizable)
         view.window!.center()
         NSApp.activate(ignoringOtherApps: true)
         view.window!.makeKeyAndOrderFront(nil)
     }
-    
+
     override func viewWillDisappear() {
         super.viewWillDisappear()
         df.set(feedTitleCheck.state, forKey: "should_display_feed_title")
@@ -103,6 +106,7 @@ class PreferencesViewController: NSViewController {
                forKey: "autofetch_time") // x*60^0 = minutes, x*60^1 = hours in minutes
         df.set(links, forKey: "feed_urls")
         df.set(notify, forKey: "feed_notifications")
+        df.set(active, forKey: "feed_active")
         df.set(Int(maxTextField.stringValue), forKey: "max_feed_entries")
         df.set(unreadClearOption.indexOfSelectedItem, forKey: "unread_clearing_option")
         df.set(dateTimeOption.indexOfSelectedItem, forKey: "date_time_option")
@@ -117,12 +121,14 @@ class PreferencesViewController: NSViewController {
         if sender.selectedSegment == 0 { // +
             links.append("New link")
             notify.append(false) // default notification checkbox status is unticked
+            active.append(true) // default activity is enabled, hence ticked
             URLTableView.reloadData()
             URLTableView.editColumn(0, row: links.count-1, with: nil, select: true) // newest will always be at the bottom
         } else if sender.selectedSegment == 1 { // -
             if URLTableView.selectedRow > -1 {
                 links.remove(at: URLTableView.selectedRow)
                 notify.remove(at: URLTableView.selectedRow)
+                active.remove(at: URLTableView.selectedRow)
                 URLTableView.reloadData()
                 linkAddRemove.setEnabled(URLTableView.selectedRow != -1, forSegment: 1)
             }
@@ -143,11 +149,12 @@ extension PreferencesViewController: NSTableViewDelegate, NSTableViewDataSource,
     }
 
     func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
-        guard links.count > row && notify.count > row else { return nil }
-        if tableColumn?.identifier.rawValue == "links" {
-            return links[row]
-        } else if tableColumn?.identifier.rawValue == "notifications" {
-            return notify[row]
+        guard links.count > row && notify.count > row && active.count > row else { return nil }
+        switch tableColumn?.identifier.rawValue {
+            case "links": return links[row]
+            case "notifications": return notify[row]
+            case "active": return active[row]
+            default: assertionFailure("unknown table column identifier")
         }
         return nil
     }
@@ -157,11 +164,12 @@ extension PreferencesViewController: NSTableViewDelegate, NSTableViewDataSource,
             print("moshi moshi? there's an empty value here")
             return
         }
-        guard links.count > row && notify.count > row else { return }
-        if tableColumn?.identifier.rawValue == "links" {
-            links[row] = (object as? String)!
-        } else if tableColumn?.identifier.rawValue == "notifications" {
-            notify[row] = object as? Int == 1
+        guard links.count > row && notify.count > row && active.count > row else { return }
+        switch tableColumn?.identifier.rawValue {
+            case "links": links[row] = (object as? String)!
+            case "notifications": notify[row] = object as? Int == 1
+            case "active": active[row] = object as? Int == 1
+            default: assertionFailure("unknown table column identifier")
         }
     }
 

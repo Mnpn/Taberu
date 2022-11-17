@@ -71,6 +71,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             defaults: [
                 "feed_urls": [],
                 "feed_notifications": [],
+                "feed_active": [],
                 "max_feed_entries": 10,
                 "autofetch_time": 60, // minutes
                 "should_autofetch": true,
@@ -368,6 +369,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     @objc func toggleFeedVisibility(_ sender: NSMenuItem) {
         let index = sender.tag
         feeds[index].active = !feeds[index].active // toggle
+        UserDefaults.standard.set(feeds.map({ $0.active }), forKey: "feed_active")
         createMenu()
         setIcon()
     }
@@ -448,15 +450,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         setURLs = (ud.array(forKey: "feed_urls") ?? []) as? [String] ?? []
         deliverNotifications = (ud.array(forKey: "feed_notifications") ?? []) as? [Bool] ?? []
-        if setURLs.count != deliverNotifications.count { // mismatch here is certain if upgrading from an older version
+        var activeFeeds = (ud.array(forKey: "feed_active") ?? []) as? [Bool] ?? []
+        if setURLs.count != deliverNotifications.count { // !! certain mismatch if upgrading from 1.0
             deliverNotifications = [Bool](repeating: false, count: setURLs.count)
             ud.set(deliverNotifications, forKey: "feed_notifications") // save this change to not break preferences
+        }
+        if setURLs.count != activeFeeds.count { // !! certain mismatch if upgrading from 1.1
+            activeFeeds = [Bool](repeating: true, count: setURLs.count)
+            ud.set(activeFeeds, forKey: "feed_active")
         }
         if setURLs != lastURLs {
             feeds = []
             for (i, var url) in setURLs.enumerated() {
                 url = url.filter {!$0.isWhitespace} // space in "New link" causes unwrap crash
-                feeds.append(Feed(url: (URL(string: url) ?? URL(string: "whitespace"))!, active: true, notify: deliverNotifications[i]))
+                feeds.append(Feed(url: (URL(string: url) ?? URL(string: "whitespace"))!, active: activeFeeds[i], notify: deliverNotifications[i]))
+            }
+        } else {
+            for (i, feed) in feeds.enumerated() {
+                feed.active = activeFeeds[i]
             }
         }
 
