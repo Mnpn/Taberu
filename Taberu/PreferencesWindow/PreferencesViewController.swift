@@ -37,15 +37,15 @@ class PreferencesViewController: NSViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        feedTitleCheck?.state = df.bool(forKey: "should_display_feed_title") ? NSControl.StateValue.on : NSControl.StateValue.off
-        feedDescCheck?.state = df.bool(forKey: "should_display_feed_description") ? NSControl.StateValue.on : NSControl.StateValue.off
-        titleCheck?.state = df.bool(forKey: "should_display_title") ? NSControl.StateValue.on : NSControl.StateValue.off
-        descCheck?.state = df.bool(forKey: "should_display_description") ? NSControl.StateValue.on : NSControl.StateValue.off
-        dateCheck?.state = df.bool(forKey: "should_display_date") ? NSControl.StateValue.on : NSControl.StateValue.off
-        authorCheck?.state = df.bool(forKey: "should_display_author") ? NSControl.StateValue.on : NSControl.StateValue.off
-        unreadCheck?.state = df.bool(forKey: "should_mark_unread") ? NSControl.StateValue.on : NSControl.StateValue.off
-        tooltipCheck?.state = df.bool(forKey: "should_show_tooltips") ? NSControl.StateValue.on : NSControl.StateValue.off
-        autoFetchCheck?.state = df.bool(forKey: "should_autofetch") ? NSControl.StateValue.on : NSControl.StateValue.off
+        feedTitleCheck?.state = tick(df.bool(forKey: "should_display_feed_title"))
+        feedDescCheck?.state = tick(df.bool(forKey: "should_display_feed_description"))
+        titleCheck?.state = tick(df.bool(forKey: "should_display_title"))
+        descCheck?.state = tick(df.bool(forKey: "should_display_description"))
+        dateCheck?.state = tick(df.bool(forKey: "should_display_date"))
+        authorCheck?.state = tick(df.bool(forKey: "should_display_author"))
+        unreadCheck?.state = tick(df.bool(forKey: "should_mark_unread"))
+        tooltipCheck?.state = tick(df.bool(forKey: "should_show_tooltips"))
+        autoFetchCheck?.state = tick(df.bool(forKey: "should_autofetch"))
 
         unreadClearOption?.selectItem(at: df.integer(forKey: "unread_clearing_option"))
         dateTimeOption?.selectItem(at: df.integer(forKey: "date_time_option"))
@@ -133,6 +133,10 @@ class PreferencesViewController: NSViewController {
                 linkAddRemove.setEnabled(URLTableView.selectedRow != -1, forSegment: 1)
             }
         }
+    }
+
+    func tick(_ val: Bool) -> NSControl.StateValue {
+        return val ? NSControl.StateValue.on : NSControl.StateValue.off
     }
 }
 
