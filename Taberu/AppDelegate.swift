@@ -52,6 +52,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     weak var autoFetchTimer: Timer?
 
     var dFTitle, dFDesc, dTitle, dDesc, dDate, dAuthor: Bool?
+    var handleHTML = true
     var showUnreadMarkers = true
     var deliverNotifications: [Bool] = []
     var unreadClearing = 0
@@ -81,6 +82,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 "should_display_description": true,
                 "should_display_date": true,
                 "should_display_author": false,
+                "should_handle_html": true,
                 "should_mark_unread": true,
                 "should_show_tooltips": true,
                 "unread_clearing_option": 0, // on view
@@ -140,7 +142,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 }
             }
 
-            for ae in finalFeed {
+            for (i, ae) in finalFeed.enumerated() {
+                if(handleHTML) {
+                    // don't spend too much time in webkit by only using it for visible entries, and throw (much faster)
+                    // regex on everything else (in case the user edits maxEntries but we don't refresh)
+                    ae.description = ae.description.removeHTML(fancy: i < maxEntries)
+                    ae.title = ae.title.removeHTML(fancy: i < maxEntries)
+                }
                 // only add new items to the feed..
                 if !feeds[forFeed].entries.contains(where: { ae == $0.item }) {
                     hasUnread = true
@@ -441,6 +449,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         dDate = ud.bool(forKey: "should_display_date")
         dAuthor = ud.bool(forKey: "should_display_author")
 
+        handleHTML = ud.bool(forKey: "should_handle_html")
         showUnreadMarkers = ud.bool(forKey: "should_mark_unread")
         unreadClearing = ud.integer(forKey: "unread_clearing_option")
         showTooltips = ud.bool(forKey: "should_show_tooltips")
@@ -567,5 +576,21 @@ extension AppDelegate: NSMenuDelegate {
             markAllRead()
         }
         createMenu()
+    }
+}
+
+extension String? {
+    // https://stackoverflow.com/q/25983558
+    public func removeHTML(fancy: Bool) -> String? {
+        guard let string = self?.data(using: String.Encoding.utf8) else { return self } // nils are also caught here
+        if(fancy) { // this actually launches a webkit process, not very efficient, but is more accurate than regex.
+            let options: [NSAttributedString.DocumentReadingOptionKey : Any] = [
+                .documentType: NSAttributedString.DocumentType.html,
+                .characterEncoding: String.Encoding.utf8.rawValue
+            ]
+            let attr = try? NSAttributedString(data: string, options: options, documentAttributes: nil)
+            return attr?.string
+        }
+        return self?.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
     }
 }

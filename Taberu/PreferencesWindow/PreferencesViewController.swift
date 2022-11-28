@@ -20,7 +20,7 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var dateTimeOption: NSPopUpButton!
     @IBOutlet weak var authorCheck: NSButton!
     @IBOutlet weak var maxTextField: NSTextField!
-    @IBOutlet weak var sanitiserCheck: NSButton!
+    @IBOutlet weak var HTMLhandlerCheck: NSButton!
     @IBOutlet weak var unreadCheck: NSButton!
     @IBOutlet weak var unreadClearOption: NSPopUpButton!
     @IBOutlet weak var tooltipCheck: NSButton!
@@ -44,6 +44,7 @@ class PreferencesViewController: NSViewController {
         descCheck?.state = tick(df.bool(forKey: "should_display_description"))
         dateCheck?.state = tick(df.bool(forKey: "should_display_date"))
         authorCheck?.state = tick(df.bool(forKey: "should_display_author"))
+        HTMLhandlerCheck?.state = tick(df.bool(forKey: "should_handle_html"))
         unreadCheck?.state = tick(df.bool(forKey: "should_mark_unread"))
         tooltipCheck?.state = tick(df.bool(forKey: "should_show_tooltips"))
         autoFetchCheck?.state = tick(df.bool(forKey: "should_autofetch"))
@@ -101,6 +102,7 @@ class PreferencesViewController: NSViewController {
         df.set(descCheck.state, forKey: "should_display_description")
         df.set(dateCheck.state, forKey: "should_display_date")
         df.set(authorCheck.state, forKey: "should_display_author")
+        df.set(HTMLhandlerCheck.state, forKey: "should_handle_html")
         df.set(unreadCheck.state, forKey: "should_mark_unread")
         df.set(autoFetchCheck.state, forKey: "should_autofetch")
         df.set(autoFetchTextField.intValue * Int32(pow(60.0, Double(autoFetchUnit.indexOfSelectedItem))),

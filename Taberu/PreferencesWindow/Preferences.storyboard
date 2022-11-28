@@ -230,9 +230,9 @@
                                             </textFieldCell>
                                         </textField>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dxq-jy-Zme">
-                                            <rect key="frame" x="18" y="159" width="181" height="18"/>
+                                            <rect key="frame" x="18" y="159" width="176" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Remove HTML formatting" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Ekc-Vd-ec1">
+                                            <buttonCell key="cell" type="check" title="Handle HTML formatting" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Ekc-Vd-ec1">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
@@ -459,7 +459,7 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <box fixedFrame="YES" title="With only one feed active, display its:" translatesAutoresizingMaskIntoConstraints="NO" id="Y8z-Tg-m0V">
+                            <box fixedFrame="YES" title="If only one is feed active, display its:" translatesAutoresizingMaskIntoConstraints="NO" id="Y8z-Tg-m0V">
                                 <rect key="frame" x="283" y="411" width="250" height="69"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <view key="contentView" id="mmV-mo-1gL">
@@ -489,6 +489,7 @@
                         </subviews>
                     </view>
                     <connections>
+                        <outlet property="HTMLhandlerCheck" destination="dxq-jy-Zme" id="5aC-pa-9eX"/>
                         <outlet property="URLTableView" destination="V2E-Kn-SyD" id="8q3-3F-8II"/>
                         <outlet property="authorCheck" destination="8Lm-dj-Duy" id="afA-e4-JK9"/>
                         <outlet property="autoFetchCheck" destination="dCw-5z-y9q" id="ydw-lO-su8"/>
@@ -503,7 +504,6 @@
                         <outlet property="linkAddRemove" destination="SV4-h2-XZr" id="Dyl-ok-XR5"/>
                         <outlet property="maxTextField" destination="xGO-Ye-cTJ" id="Nun-0i-INR"/>
                         <outlet property="miniTitles" destination="YUq-BY-lW5" id="sfc-Mp-de0"/>
-                        <outlet property="sanitiserCheck" destination="dxq-jy-Zme" id="0ca-BB-Pf2"/>
                         <outlet property="titleCheck" destination="EfN-3w-sV0" id="dWm-A6-mQx"/>
                         <outlet property="tooltipCheck" destination="z9c-gu-2bl" id="4BM-KD-x1i"/>
                         <outlet property="unreadCheck" destination="v9f-D9-O8c" id="idx-rL-nJ5"/>
