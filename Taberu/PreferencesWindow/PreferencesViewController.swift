@@ -126,7 +126,7 @@ class PreferencesViewController: NSViewController {
             notify.append(false) // default notification checkbox status is unticked
             active.append(true) // default activity is enabled, hence ticked
             URLTableView.reloadData()
-            URLTableView.editColumn(0, row: links.count-1, with: nil, select: true) // newest will always be at the bottom
+            URLTableView.editColumn(1, row: links.count-1, with: nil, select: true) // newest will always be at the bottom
         } else if sender.selectedSegment == 1 { // -
             if URLTableView.selectedRow > -1 {
                 links.remove(at: URLTableView.selectedRow)
