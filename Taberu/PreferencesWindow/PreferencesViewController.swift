@@ -20,6 +20,7 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var dateTimeOption: NSPopUpButton!
     @IBOutlet weak var authorCheck: NSButton!
     @IBOutlet weak var maxTextField: NSTextField!
+    @IBOutlet weak var sanitiserCheck: NSButton!
     @IBOutlet weak var unreadCheck: NSButton!
     @IBOutlet weak var unreadClearOption: NSPopUpButton!
     @IBOutlet weak var tooltipCheck: NSButton!

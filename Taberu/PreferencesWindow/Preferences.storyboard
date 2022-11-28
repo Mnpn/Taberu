@@ -90,16 +90,12 @@
                                     </textField>
                                 </subviews>
                             </visualEffectView>
-                            <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="5ei-jp-1Mf">
-                                <rect key="frame" x="32" y="481" width="487" height="5"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            </box>
                             <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="uGs-9T-U9Y">
-                                <rect key="frame" x="32" y="221" width="487" height="5"/>
+                                <rect key="frame" x="32" y="230" width="487" height="5"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                             </box>
                             <box fixedFrame="YES" title="Feed entries should display their:" translatesAutoresizingMaskIntoConstraints="NO" id="NIZ-8P-C3D">
-                                <rect key="frame" x="283" y="228" width="250" height="170"/>
+                                <rect key="frame" x="283" y="237" width="250" height="170"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <view key="contentView" id="biN-vC-dXc">
                                     <rect key="frame" x="4" y="5" width="242" height="148"/>
@@ -206,7 +202,7 @@
                                 <font key="titleFont" metaFont="system"/>
                             </box>
                             <box fixedFrame="YES" title="Taberu should:" translatesAutoresizingMaskIntoConstraints="NO" id="JHX-Gv-rcu">
-                                <rect key="frame" x="17" y="228" width="250" height="243"/>
+                                <rect key="frame" x="17" y="237" width="250" height="243"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <view key="contentView" id="ldn-LJ-rIz">
                                     <rect key="frame" x="4" y="5" width="242" height="221"/>
@@ -236,7 +232,7 @@
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dxq-jy-Zme">
                                             <rect key="frame" x="18" y="159" width="181" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Remove HTML formatting" bezelStyle="regularSquare" imagePosition="left" enabled="NO" inset="2" id="Ekc-Vd-ec1">
+                                            <buttonCell key="cell" type="check" title="Remove HTML formatting" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Ekc-Vd-ec1">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
@@ -362,7 +358,7 @@
                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UrB-DA-2U8">
                                             <rect key="frame" x="38" y="61" width="191" height="29"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" title="They contain entries' descriptions, regardless of their set visibility." id="dAx-AU-lag">
+                                            <textFieldCell key="cell" title="Pro Tip: These always contain the entries' descriptions, in full." id="dAx-AU-lag">
                                                 <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -373,14 +369,14 @@
                                 <font key="titleFont" metaFont="system"/>
                             </box>
                             <scrollView fixedFrame="YES" borderType="line" autohidesScrollers="YES" horizontalLineScroll="18" horizontalPageScroll="10" verticalLineScroll="18" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mxI-0Z-CWo">
-                                <rect key="frame" x="20" y="96" width="510" height="100"/>
+                                <rect key="frame" x="20" y="96" width="510" height="110"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <clipView key="contentView" drawsBackground="NO" id="BdO-Vk-yAg">
-                                    <rect key="frame" x="1" y="1" width="508" height="98"/>
+                                    <rect key="frame" x="1" y="1" width="508" height="108"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView focusRingType="none" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" rowHeight="18" headerView="qZL-1A-Qfs" id="V2E-Kn-SyD">
-                                            <rect key="frame" x="0.0" y="0.0" width="508" height="70"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="508" height="80"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -455,7 +451,7 @@
                                 </connections>
                             </segmentedControl>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="k1F-ir-NFX">
-                                <rect key="frame" x="32" y="197" width="373" height="16"/>
+                                <rect key="frame" x="32" y="208" width="373" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Fetch content and send notifications from the following links:" id="aRj-yp-y7C">
                                     <font key="font" metaFont="system"/>
@@ -463,25 +459,25 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <box fixedFrame="YES" title="Feeds should display their:" translatesAutoresizingMaskIntoConstraints="NO" id="Y8z-Tg-m0V">
-                                <rect key="frame" x="283" y="402" width="250" height="69"/>
+                            <box fixedFrame="YES" title="With only one feed active, display its:" translatesAutoresizingMaskIntoConstraints="NO" id="Y8z-Tg-m0V">
+                                <rect key="frame" x="283" y="411" width="250" height="69"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <view key="contentView" id="mmV-mo-1gL">
                                     <rect key="frame" x="4" y="5" width="242" height="47"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OVm-DA-h2D">
-                                            <rect key="frame" x="18" y="14" width="68" height="18"/>
+                                            <rect key="frame" x="18" y="14" width="62" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Names" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="XbQ-Qw-mMQ">
+                                            <buttonCell key="cell" type="check" title="Name" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="XbQ-Qw-mMQ">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mfQ-Jh-uM3">
-                                            <rect key="frame" x="121" y="14" width="103" height="18"/>
+                                            <rect key="frame" x="126" y="14" width="96" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Descriptions" bezelStyle="regularSquare" imagePosition="left" inset="2" id="LDB-3s-O3X">
+                                            <buttonCell key="cell" type="check" title="Description" bezelStyle="regularSquare" imagePosition="left" inset="2" id="LDB-3s-O3X">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
@@ -507,6 +503,7 @@
                         <outlet property="linkAddRemove" destination="SV4-h2-XZr" id="Dyl-ok-XR5"/>
                         <outlet property="maxTextField" destination="xGO-Ye-cTJ" id="Nun-0i-INR"/>
                         <outlet property="miniTitles" destination="YUq-BY-lW5" id="sfc-Mp-de0"/>
+                        <outlet property="sanitiserCheck" destination="dxq-jy-Zme" id="0ca-BB-Pf2"/>
                         <outlet property="titleCheck" destination="EfN-3w-sV0" id="dWm-A6-mQx"/>
                         <outlet property="tooltipCheck" destination="z9c-gu-2bl" id="4BM-KD-x1i"/>
                         <outlet property="unreadCheck" destination="v9f-D9-O8c" id="idx-rL-nJ5"/>
