@@ -38,7 +38,6 @@ class Feed {
     }
 }
 
-@main
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     private var statusItem: NSStatusItem!
     var preferencesController: NSWindowController?

@@ -10,10 +10,9 @@
 		172A0C29285C99A00042A7AE /* Preferences.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 172A0C28285C99A00042A7AE /* Preferences.storyboard */; };
 		172A0C31285CA2600042A7AE /* PreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A0C30285CA2600042A7AE /* PreferencesViewController.swift */; };
 		172A0C33285CA3150042A7AE /* PreferencesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A0C32285CA3150042A7AE /* PreferencesWindowController.swift */; };
+		1774423629378D1100606BB8 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1774423529378D1100606BB8 /* main.swift */; };
 		17C15038285BF99700910754 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C15037285BF99700910754 /* AppDelegate.swift */; };
-		17C1503A285BF99700910754 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C15039285BF99700910754 /* ViewController.swift */; };
 		17C1503C285BF99900910754 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17C1503B285BF99900910754 /* Assets.xcassets */; };
-		17C1503F285BF99900910754 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 17C1503D285BF99900910754 /* Main.storyboard */; };
 		17C15048285BF9C300910754 /* FeedKit in Frameworks */ = {isa = PBXBuildFile; productRef = 17C15047285BF9C300910754 /* FeedKit */; };
 /* End PBXBuildFile section */
 
@@ -21,11 +20,10 @@
 		172A0C28285C99A00042A7AE /* Preferences.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Preferences.storyboard; sourceTree = "<group>"; };
 		172A0C30285CA2600042A7AE /* PreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesViewController.swift; sourceTree = "<group>"; };
 		172A0C32285CA3150042A7AE /* PreferencesWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindowController.swift; sourceTree = "<group>"; };
+		1774423529378D1100606BB8 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = main.swift; path = Taberu/main.swift; sourceTree = "<group>"; };
 		17C15034285BF99700910754 /* Taberu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Taberu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		17C15037285BF99700910754 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		17C15039285BF99700910754 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		17C1503B285BF99900910754 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		17C1503E285BF99900910754 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		17C15040285BF99900910754 /* Taberu.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Taberu.entitlements; sourceTree = "<group>"; };
 		17C15049285BFCF500910754 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -55,6 +53,7 @@
 		17C1502B285BF99700910754 = {
 			isa = PBXGroup;
 			children = (
+				1774423529378D1100606BB8 /* main.swift */,
 				17C15036285BF99700910754 /* Taberu */,
 				17C15035285BF99700910754 /* Products */,
 			);
@@ -74,9 +73,7 @@
 				172A0C2F285CA09D0042A7AE /* PreferencesWindow */,
 				17C15049285BFCF500910754 /* Info.plist */,
 				17C15037285BF99700910754 /* AppDelegate.swift */,
-				17C15039285BF99700910754 /* ViewController.swift */,
 				17C1503B285BF99900910754 /* Assets.xcassets */,
-				17C1503D285BF99900910754 /* Main.storyboard */,
 				17C15040285BF99900910754 /* Taberu.entitlements */,
 			);
 			path = Taberu;
@@ -148,7 +145,6 @@
 			files = (
 				172A0C29285C99A00042A7AE /* Preferences.storyboard in Resources */,
 				17C1503C285BF99900910754 /* Assets.xcassets in Resources */,
-				17C1503F285BF99900910754 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -159,25 +155,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				17C1503A285BF99700910754 /* ViewController.swift in Sources */,
 				17C15038285BF99700910754 /* AppDelegate.swift in Sources */,
 				172A0C33285CA3150042A7AE /* PreferencesWindowController.swift in Sources */,
+				1774423629378D1100606BB8 /* main.swift in Sources */,
 				172A0C31285CA2600042A7AE /* PreferencesViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		17C1503D285BF99900910754 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				17C1503E285BF99900910754 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		17C15041285BF99900910754 /* Debug */ = {
@@ -304,7 +289,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 35BSP6SUG9;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -312,8 +297,8 @@
 				INFOPLIST_FILE = Taberu/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Taberu;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.news";
+				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -337,7 +322,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 35BSP6SUG9;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -345,8 +330,8 @@
 				INFOPLIST_FILE = Taberu/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Taberu;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.news";
+				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
