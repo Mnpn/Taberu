@@ -94,7 +94,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         // create a menu bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         setIcon(icon: "tray.full.fill")
-        
+
         initFeed()
         UNUserNotificationCenter.current().delegate = self
     }
@@ -338,11 +338,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
             if hasUnread && deliverNotifications.contains(true) && fromAF && unnotified.count > 0 {
                 if unnotified.count > 1 {
-                    sendNotification(title: "Taberu", sub: "", desc: "There are " + String(unnotified.count) + " new entries.")
+                    sendNotification(title: "Taberu", sub: "", desc: "There are " + String(unnotified.count) + " new entries.", url: nil)
                 } else {
                     sendNotification(title: unnotified[0].parent.name,
                                      sub: unnotified[0].item.title ?? "There is one new entry.",
-                                     desc: dDesc! ? (unnotified[0].item.description ?? "") : "")
+                                     desc: dDesc! ? (unnotified[0].item.description ?? "") : "", url: unnotified[0].item.link)
                 }
                 fromAF = false
             }
@@ -547,7 +547,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 
     let un = UNUserNotificationCenter.current()
-    func sendNotification(title: String, sub: String, desc: String) {
+    func sendNotification(title: String, sub: String, desc: String, url: String?) {
         un.requestAuthorization(options: [.alert]) { (authorised, error) in
             if authorised {
                 self.un.getNotificationSettings { settings in
@@ -555,13 +555,28 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                     content.title = title
                     content.subtitle = sub
                     content.body = desc
-                    let request = UNNotificationRequest(identifier: String(self.entryID), content: content, trigger: nil)
+                    let request = UNNotificationRequest(identifier: url ?? "", content: content, trigger: nil)
                     self.un.add(request) { error in
                         if error != nil { print(error?.localizedDescription as Any) }
                     }
                 }
             }
         }
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void ) { // user has clicked a notification
+        // alternatively we make this receive the entry's ID and look for that and get the URL
+        if response.notification.request.identifier != "" {
+            openURL(url: response.notification.request.identifier) // open its URL
+        }
+        /*
+         * I thought it could be cool if the menu opened if the entry didn't have a URL.
+         * Turns out we have to wait for this function to return/finish before opening it,
+         * otherwise the menu will instantly close again. running the following disgrace in a Task works:
+         * usleep(100000) // some arbitrary magic number..
+         * await statusItem.button?.performClick(nil)
+         * but is a terrible idea.
+         */
     }
 }
 
