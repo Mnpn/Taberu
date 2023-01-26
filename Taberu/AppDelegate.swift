@@ -50,7 +50,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     var autoFetchTime: Int?
     weak var autoFetchTimer: Timer?
 
-    var dFTitle, dFDesc, dTitle, dDesc, dDate, dAuthor: Bool?
+    var (dFTitle, dFDesc, dTitle, dDesc, dDate, dAuthor) = (true, false, true, true, true, false)
     var handleHTML = true
     var showUnreadMarkers = true
     var deliverNotifications: [Bool] = []
@@ -62,7 +62,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     var feeds: [Feed] = []
     var maxEntries = 10
-    var maxDescLength = 86 // characters
+    var maxTextWidth = 72 // characters
+    var maxTextLines = 8
     var wrapTrimOption = 0
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -75,12 +76,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 "max_feed_entries": 10,
                 "autofetch_time": 60, // minutes
                 "should_autofetch": true,
-                "should_display_feed_title": true,
-                "should_display_feed_description": false,
-                "should_display_title": true,
-                "should_display_description": true,
-                "should_display_date": true,
-                "should_display_author": false,
+                "should_display_feed_title": dFTitle,
+                "should_display_feed_description": dFDesc,
+                "should_display_title": dTitle,
+                "should_display_description": dDesc,
+                "should_display_date": dDate,
+                "should_display_author": dAuthor,
                 "should_handle_html": true,
                 "should_mark_unread": true,
                 "should_show_tooltips": true,
@@ -204,18 +205,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             if daijoubujanai != "" {
                 errMsg += "Failed to fetch from one or more URLs:\n" + daijoubujanai
             } else {
-                if activeFeeds == 1 && (dFTitle! || dFDesc!) {
+                if activeFeeds == 1 && (dFTitle || dFDesc) {
                     let info = NSMenuItem(title: "", action: nil, keyEquivalent: "")
                     let infoString = NSMutableAttributedString()
-                    if dFTitle! {
+                    if dFTitle {
                         infoString.append(NSMutableAttributedString(string: feeds[lastActiveFeed].name))
                     }
-                    if dFDesc! {
-                        infoString.append(NSMutableAttributedString(string: (dFTitle! ? "\n" : "") + feeds[lastActiveFeed].desc))
+                    if dFDesc {
+                        infoString.append(NSMutableAttributedString(string: (dFTitle ? "\n" : "") + feeds[lastActiveFeed].desc))
                     }
                     info.attributedTitle = infoString
                     menu.addItem(info)
-                } else if (dFTitle! || dFDesc!) && miniTitles == 0 { // want to display a title or desc, but there are several feeds active
+                } else if (dFTitle || dFDesc) && miniTitles == 0 { // want to display a title or desc, but there are several feeds active
                     menu.addItem(NSMenuItem(title: "Displaying content from several feeds", action: nil, keyEquivalent: ""))
                 }
             }
@@ -254,8 +255,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                     unnotified.append(entry)
                     entry.notified = true // this also means that viewed (but not yet read) won't sent notifications on the next autofetch
                 }
-                let showDate = dDate! && entry.item.pubDate != nil
-                let showDesc = dDesc! && entry.item.description != nil && entry.item.description!.filter({ !$0.isWhitespace }) != ""
+                let showDate = dDate && entry.item.pubDate != nil
+                let showDesc = dDesc && entry.item.description != nil && entry.item.description!.filter({ !$0.isWhitespace }) != ""
 
                 menu.addItem(NSMenuItem.separator())
 
@@ -279,6 +280,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 }
                 if showTooltips {
                     var tooltip = "From \"" + entry.parent.name + "\"\n"
+                    tooltip += entry.item.title != nil ? ("\n" + entry.item.title! + "\n\n") : ""
                     tooltip += entry.item.description != nil ? ("\nDescription:\n\"" + entry.item.description! + "\"\n") : ""
                     tooltip += entry.item.link != nil ? "\nClick to visit page." : "\""
                     entryItem.toolTip = tooltip
@@ -289,16 +291,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                     attrstring.append(NSMutableAttributedString(string: "●  ", attributes:
                                                                     [NSAttributedString.Key.foregroundColor: NSColor.controlAccentColor, NSAttributedString.Key.font: NSFont.systemFont(ofSize: 7), NSAttributedString.Key.baselineOffset: 2.113]))
                 }
-                attrstring.append(NSMutableAttributedString(string: (dTitle! ? (entry.item.title ?? "Unknown title") : ""),
-                    attributes: [NSAttributedString.Key.font: NSFont.systemFont(ofSize: 13, weight: unread ? .heavy : .regular)]))
+                var title = entry.item.title ?? ""
+                switch wrapTrimOption {
+                    case 0: title = textWrap(prefix: "●  ", text: title, unreadOffset: unread) // wrap
+                    case 1: // trim
+                        if title.count > maxTextWidth {
+                            title = String(title.prefix(maxTextWidth)) + "…"
+                        }
+                    case 2: break; // do nothing
+                    default: assertionFailure("title wraptrim received unknown value '\(wrapTrimOption)'")
+                }
+                if dTitle {
+                    attrstring.append(NSMutableAttributedString(string: title,
+                                                                attributes: [NSAttributedString.Key.font: NSFont.systemFont(ofSize: 13, weight: unread ? .heavy : .regular)]))
+                }
 
-                var bottomField = (unread && dTitle!) ? "   " : ""
-                if dAuthor! {
-                    let author = entry.item.author ?? "Unknown author"
-                    bottomField += author
+                var bottomField = (unread && dTitle) ? "   " : ""
+                if entry.item.author != nil && dAuthor {
+                    bottomField += entry.item.author! + (showDate ? " at " : "")
                 }
                 if showDate {
-                    bottomField += dAuthor! ? " at " : ""
                     let dateFormatter = DateFormatter()
                     switch dateTimeOption {
                         case 0: dateFormatter.dateFormat = "y-MM-dd HH:mm:ss"
@@ -310,23 +322,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 }
                 if showDesc {
                     let desc = entry.item.description ?? "No description"
-                    bottomField += (showDate || dAuthor!) ? ": " : ""
-                    if wrapTrimOption == 0 { // wrap
-                        bottomField += textWrap(preExisting: bottomField, new: desc, unread: unread)
-                    } else if wrapTrimOption == 1 { // trim
-                        bottomField += desc.count > maxDescLength ? String(desc.prefix(maxDescLength)) + "…" : desc
-                    } else { // do nothing special
-                        bottomField += desc
+                    bottomField += (showDate || dAuthor) ? ": " : ""
+                    switch wrapTrimOption {
+                        case 0: bottomField += textWrap(prefix: bottomField, text: desc, unreadOffset: unread) // wrap
+                        case 1: bottomField += desc.count > maxTextWidth ? String(desc.prefix(maxTextWidth)) + "…" : desc // trim
+                        case 2: bottomField += desc // do nothing
+                        default: assertionFailure("description wraptrim received unknown value '\(wrapTrimOption)'")
                     }
                 }
 
-                if showDate || showDesc || dAuthor! {
-                    attrstring.append(NSMutableAttributedString(string: (dTitle! ? "\n" : "") + bottomField, attributes:
+                if showDate || showDesc || dAuthor {
+                    attrstring.append(NSMutableAttributedString(string: (dTitle ? "\n" : "") + bottomField, attributes:
                                     [NSAttributedString.Key.foregroundColor: NSColor.darkGray,
                                      NSAttributedString.Key.font: NSFont.systemFont(ofSize: 12)]))
                 }
 
-                if dTitle! || dAuthor! || showDesc || showDate {
+                if dTitle || dAuthor || showDesc || showDate {
                     entryItem.attributedTitle = attrstring
                     // store the link in the title (attr overrides the content), this lets us fetch it on click events later
                     entryItem.title = String(entry.item.link ?? "")
@@ -342,7 +353,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 } else {
                     sendNotification(title: unnotified[0].parent.name,
                                      sub: unnotified[0].item.title ?? "There is one new entry.",
-                                     desc: dDesc! ? (unnotified[0].item.description ?? "") : "", url: unnotified[0].item.link)
+                                     desc: dDesc ? (unnotified[0].item.description ?? "") : "", url: unnotified[0].item.link)
                 }
                 fromAF = false
             }
@@ -518,24 +529,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         }
     }
 
-    func textWrap(preExisting: String, new: String, unread: Bool) -> String { // word wrap mess :(
+    // prefix is not accounted for in wrapping calculations
+    func textWrap(prefix: String, text: String, unreadOffset: Bool) -> String { // word wrap mess :(
         // Q: "Why?", A: NSAttributedStrings can have NSParagraphStyles which have wrapping settings,
         // but you cannot set a max width on an NSMenu, so they're half useless.
-        let lines = NSString(string: new).components(separatedBy: .whitespacesAndNewlines) // split string by space, sorry in advance of your language doesn't use them! consider using description trimming instead.
-        var biglines: [String] = []
-        var current = ""
-        for line in lines {
-            current += line + " "
-            if current.count > ((biglines.count > 0) ? maxDescLength : maxDescLength-preExisting.count) {
-                biglines.append(current)
-                current = ""
+        let words = NSString(string: text).components(separatedBy: .whitespacesAndNewlines) // split string by space, sorry in advance of your language doesn't use them! consider using description trimming instead.
+        var lines: [String] = []
+        var builtLine = ""
+        for word in words {
+            builtLine += word + " "
+            // append the words to the line. if exceeding the max width, move on to making the next line.
+            if builtLine.count > ((lines.count > 0) ? maxTextWidth : maxTextWidth-prefix.count) {
+                lines.append(builtLine)
+                builtLine = ""
             }
         }
-        if current.filter({!$0.isWhitespace}) != "" { biglines.append(current) } // add what's left unless empty
-        if biglines.count > 8 { biglines = Array(biglines[..<8]); biglines[7] += "…" } // limit lines too
+        if builtLine.filter({!$0.isWhitespace}) != "" { lines.append(builtLine) } // add what's left of the last line unless it's empty
+        if lines.count > maxTextLines { lines = Array(lines[..<maxTextLines]); lines[maxTextLines-1] += "…" } // limit line count
         var finalLine = ""
-        for (i, bigline) in biglines.enumerated() {
-            finalLine += (i != 0 ? "\n" : "") + ((unread && dTitle!) && i != 0 ? "   " : "") + bigline
+        for (i, bigline) in lines.enumerated() { // build a single string
+            finalLine += (i != 0 ? "\n" : "") + ((unreadOffset && dTitle) && i != 0 ? "   " : "") + bigline
         }
         return finalLine
     }
