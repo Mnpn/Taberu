@@ -104,6 +104,7 @@ class PreferencesViewController: NSViewController {
         df.set(authorCheck.state, forKey: "should_display_author")
         df.set(HTMLhandlerCheck.state, forKey: "should_handle_html")
         df.set(unreadCheck.state, forKey: "should_mark_unread")
+        df.set(tooltipCheck?.state, forKey: "should_show_tooltips")
         df.set(autoFetchCheck.state, forKey: "should_autofetch")
         df.set(autoFetchTextField.intValue * Int32(pow(60.0, Double(autoFetchUnit.indexOfSelectedItem))),
                forKey: "autofetch_time") // x*60^0 = minutes, x*60^1 = hours in minutes
