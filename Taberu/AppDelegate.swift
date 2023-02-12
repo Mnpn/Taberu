@@ -17,12 +17,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var entryID = 0
     var userfacingError = ""
     var autofetched = false
-    weak var autoFetchTimer: Timer?
+    var autofetchTimer: Timer?
     var hasUnread = false
 
     var feeds: [Feed] = []
     var deliverNotifications: [Bool] = []
     var setURLs: [String] = [], lastURLs: [String] = []
+
+    var refreshButton = NSMenuItem()
+    weak var menuUpdateTimer: Timer?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         Settings.initUserDefaults()
@@ -47,6 +50,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let storyboard = NSStoryboard(name: NSStoryboard.Name("Preferences"), bundle: nil)
         return storyboard.instantiateInitialController() as? NSWindowController
     }()
+
+    func getTimerRemaining(_ timer: Timer!) -> String {
+        guard timer != nil && timer.isValid else { return "??" }
+        let timeRemaining = timer.fireDate.timeIntervalSinceNow
+        if timeRemaining <= 0 { return "00:00" }
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.minute, .second]
+        if timeRemaining > 3600 { // show hours if time remaining is > 1h
+            formatter.allowedUnits.insert(.hour)
+        }
+        formatter.zeroFormattingBehavior = .pad
+        formatter.unitsStyle = .positional
+        return formatter.string(from: timeRemaining)!
+    }
 
     func applicationWillTerminate(_ aNotification: Notification) { }
 

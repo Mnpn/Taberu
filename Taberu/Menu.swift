@@ -61,14 +61,8 @@ extension AppDelegate: NSMenuDelegate {
                 }
             }
 
-            let refresh = NSMenuItem(title: "Refresh", action: #selector(bakaReload), keyEquivalent: "r")
-            let refreshString = NSMutableAttributedString(string: "Refresh")
-            if Settings.doAutofetch {
-                refreshString.append(NSMutableAttributedString(string: " (Auto-fetch is on)",
-                                                               attributes: [.foregroundColor: NSColor.darkGray]))
-            }
-            refresh.attributedTitle = refreshString
-            menu.addItem(refresh)
+            refreshButton = NSMenuItem(title: "Refresh", action: #selector(bakaReload), keyEquivalent: "r")
+            menu.addItem(refreshButton)
 
             let hardRefresh = menu.addItem(withTitle: "Refresh and Reset All Entries", action: #selector(bakaReload), keyEquivalent:"r")
             hardRefresh.isAlternate = true
@@ -202,10 +196,14 @@ extension AppDelegate: NSMenuDelegate {
             menu.addItem(err)
         }
 
+        appendMenuBottom(menu: menu)
+        statusItem.menu = menu
+    }
+
+    func appendMenuBottom(menu: NSMenu) {
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Preferences…", action: #selector(openPreferences), keyEquivalent: ","))
         menu.addItem(NSMenuItem(title: "Quit Taberu", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
-        statusItem.menu = menu
     }
 
     @objc func toggleFeedVisibility(_ sender: NSMenuItem) {
@@ -260,13 +258,36 @@ extension AppDelegate: NSMenuDelegate {
         }
     }
 
+    func updateMenu() {
+        let refreshString = NSMutableAttributedString(string: "Refresh")
+        if Settings.doAutofetch {
+            let remainingTime = getTimerRemaining(autofetchTimer)
+            if remainingTime == "00:00" { statusItem.menu?.cancelTracking() } // close the menu if it's time to refresh.. not that nice
+            refreshString.append(NSMutableAttributedString(string: " (Auto-fetch in \(remainingTime))",
+                                                           attributes: [.foregroundColor: NSColor.darkGray,
+                                                                        .font: NSFont.monospacedDigitSystemFont(ofSize: 0, weight: .regular)]))
+        }
+        refreshButton.attributedTitle = refreshString
+    }
+
     func menuWillOpen(_ menu: NSMenu) {
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+        if Settings.doAutofetch {
+            menuUpdateTimer?.invalidate()
+            menuUpdateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+                self.updateMenu()
+            }
+            RunLoop.current.add(menuUpdateTimer!, forMode: .common) // required to have the menu update while open
+            menuUpdateTimer?.fire()
+        }
     }
 
     func menuDidClose(_ menu: NSMenu) {
         if Settings.unreadClearing == .view && hasUnread { // clearing on view
             markAllRead()
+        }
+        if Settings.doAutofetch {
+            menuUpdateTimer?.invalidate()
         }
         createMenu()
     }

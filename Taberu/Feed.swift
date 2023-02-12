@@ -13,6 +13,12 @@ extension AppDelegate {
     // reload() is async to not delay other actions such as closing preferences
     func reload(syncOverride: Bool) async {
         updateIcon(icon: "tray.and.arrow.down.fill")
+
+        let menu = NSMenu()
+        menu.addItem(NSMenuItem(title: "Refreshing, please wait..", action: nil, keyEquivalent: ""))
+        appendMenuBottom(menu: menu)
+        statusItem.menu = menu
+
         for (i, feed) in feeds.enumerated() {
             if (feed.url.absoluteString != "" && setURLs != lastURLs) || syncOverride {
                 fetch(url: feed.url, forFeed: i)
@@ -57,11 +63,12 @@ extension AppDelegate {
 
         Task { await reload(syncOverride: setURLs != lastURLs) }
 
-        autoFetchTimer?.invalidate()
+        autofetchTimer?.invalidate()
         if Settings.doAutofetch {
-            autoFetchTimer = Timer.scheduledTimer(withTimeInterval: Double(Settings.autofetchInterval) * 60.0, repeats: true) { timer in
+            autofetchTimer = Timer.scheduledTimer(withTimeInterval: Double(Settings.autofetchInterval) * 60.0, repeats: true) { timer in
                 Task { self.autofetched = true; await self.reload(syncOverride: true); self.autofetched = false }
             }
+            RunLoop.current.add(autofetchTimer!, forMode: .common) // needed to refresh while menu is open
         }
     }
 

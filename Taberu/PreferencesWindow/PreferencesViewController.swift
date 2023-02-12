@@ -146,6 +146,7 @@ class PreferencesViewController: NSViewController {
 
 class nombas: NumberFormatter {
     override func isPartialStringValid(_ partialString: String, newEditingString newString: AutoreleasingUnsafeMutablePointer<NSString?>?, errorDescription error: AutoreleasingUnsafeMutablePointer<NSString?>?) -> Bool { // wtf
+        if partialString.count > 4 { return false } // limit text fields to 4 characters
         return partialString == partialString.components(separatedBy: NSCharacterSet(charactersIn: "0123456789").inverted).joined(separator: "")
     }
 }
