@@ -153,6 +153,12 @@ class nombas: NumberFormatter {
 
 // Thanks IINA - https://github.com/iina/iina
 extension PreferencesViewController: NSTableViewDelegate, NSTableViewDataSource, NSControlTextEditingDelegate {
+    override func cancelOperation(_ sender: Any?) { // esc key
+        URLTableView.abortEditing() // discard changes
+        self.view.window!.makeFirstResponder(URLTableView) // don't lose focus
+        // todo: fix the alert sound aaaa
+    }
+
     func numberOfRows(in tableView: NSTableView) -> Int {
         return links.count
     }
