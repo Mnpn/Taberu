@@ -255,7 +255,7 @@
                                             </buttonCell>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="z9c-gu-2bl">
-                                            <rect key="frame" x="18" y="91" width="200" height="18"/>
+                                            <rect key="frame" x="18" y="89" width="200" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="Show tooltips when hovering" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Aj3-FK-ogI">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -272,7 +272,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dCw-5z-y9q">
-                                            <rect key="frame" x="18" y="41" width="209" height="18"/>
+                                            <rect key="frame" x="18" y="45" width="209" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="Automatically refresh content:" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="rog-lT-13L">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -364,15 +364,14 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UrB-DA-2U8">
-                                            <rect key="frame" x="38" y="61" width="191" height="29"/>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FsQ-sE-Gie">
+                                            <rect key="frame" x="18" y="67" width="200" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" title="Pro Tip: These always contain the entries' descriptions, in full." id="dAx-AU-lag">
-                                                <font key="font" metaFont="smallSystem"/>
-                                                <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
-                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                            </textFieldCell>
-                                        </textField>
+                                            <buttonCell key="cell" type="check" title="Check for updates on launch" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="AOu-2s-5nm">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                        </button>
                                     </subviews>
                                 </view>
                                 <font key="titleFont" metaFont="system"/>
@@ -517,6 +516,7 @@
                         <outlet property="tooltipCheck" destination="z9c-gu-2bl" id="4BM-KD-x1i"/>
                         <outlet property="unreadCheck" destination="v9f-D9-O8c" id="idx-rL-nJ5"/>
                         <outlet property="unreadClearOption" destination="QUw-6W-gtt" id="kPD-sJ-dvs"/>
+                        <outlet property="updateCheck" destination="FsQ-sE-Gie" id="ZrZ-0i-rNv"/>
                         <outlet property="versionLabel" destination="0U3-6F-Aju" id="8ar-87-WfC"/>
                         <outlet property="wrapTrimOption" destination="671-mS-HlH" id="ZM8-St-frh"/>
                     </connections>

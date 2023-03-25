@@ -24,6 +24,7 @@ class PreferencesViewController: NSViewController {
     @IBOutlet weak var unreadCheck: NSButton!
     @IBOutlet weak var unreadClearOption: NSPopUpButton!
     @IBOutlet weak var tooltipCheck: NSButton!
+    @IBOutlet weak var updateCheck: NSButton!
     @IBOutlet weak var miniTitles: NSPopUpButton!
     
     @IBOutlet weak var URLTableView: NSTableView!
@@ -47,6 +48,7 @@ class PreferencesViewController: NSViewController {
         HTMLhandlerCheck?.state = tick(df.bool(forKey: "should_handle_html"))
         unreadCheck?.state = tick(df.bool(forKey: "should_mark_unread"))
         tooltipCheck?.state = tick(df.bool(forKey: "should_show_tooltips"))
+        updateCheck?.state = tick(df.bool(forKey: "should_check_updates"))
         autoFetchCheck?.state = tick(df.bool(forKey: "should_autofetch"))
 
         unreadClearOption?.selectItem(at: df.integer(forKey: "unread_clearing_option"))
@@ -105,6 +107,7 @@ class PreferencesViewController: NSViewController {
         df.set(HTMLhandlerCheck.state, forKey: "should_handle_html")
         df.set(unreadCheck.state, forKey: "should_mark_unread")
         df.set(tooltipCheck?.state, forKey: "should_show_tooltips")
+        df.set(updateCheck?.state, forKey: "should_check_updates")
         df.set(autoFetchCheck.state, forKey: "should_autofetch")
         df.set(autoFetchTextField.intValue * Int32(pow(60.0, Double(autoFetchUnit.indexOfSelectedItem))),
                forKey: "autofetch_time") // x*60^0 = minutes, x*60^1 = hours in minutes

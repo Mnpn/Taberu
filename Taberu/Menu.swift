@@ -13,6 +13,15 @@ extension AppDelegate: NSMenuDelegate {
         let menu = NSMenu()
         menu.delegate = self
 
+        if updateVersion != nil && updateVersion != Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String {
+            let updateNotice = NSMenuItem(title: "PH", action: #selector(entryClick), keyEquivalent: "")
+            updateNotice.attributedTitle = NSAttributedString(string: "A new update is available (\(updateVersion!)), click to view & dismiss this notice.")
+            updateNotice.title = RELEASE_URL + updateVersion!
+            updateNotice.identifier = NSUserInterfaceItemIdentifier("menu-update-notice")
+            menu.addItem(updateNotice)
+            menu.addItem(NSMenuItem.separator())
+        }
+
         if feeds.count > 1 {
             let feedOption = NSMenuItem(title: "Active feeds", action: nil, keyEquivalent: "")
             let feedSelector = NSMenu()
@@ -226,13 +235,18 @@ extension AppDelegate: NSMenuDelegate {
     }
 
     @objc func entryClick(_ sender: NSMenuItem) {
-        if Settings.unreadClearing == .click {
-            for feed in feeds {
-                if let entry = feed.entries.first(where: { $0.id == sender.tag }) {
-                    entry.unread = false
-                    createMenu()
-                    updateIcon()
-                    break
+        if sender.identifier == NSUserInterfaceItemIdentifier("menu-update-notice") {
+            updateVersion = nil
+            createMenu()
+        } else {
+            if Settings.unreadClearing == .click {
+                for feed in feeds {
+                    if let entry = feed.entries.first(where: { $0.id == sender.tag }) {
+                        entry.unread = false
+                        createMenu()
+                        updateIcon()
+                        break
+                    }
                 }
             }
         }

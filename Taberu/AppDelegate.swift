@@ -19,6 +19,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var autofetched = false
     var autofetchTimer: Timer?
     var hasUnread = false
+    var updateVersion: String?
+    let RELEASE_URL = "https://github.com/Mnpn/Taberu/releases/tag/v"
+    let GHAPI_RELEASES_URL = "https://api.github.com/repos/Mnpn/Taberu/releases"
 
     var feeds: [Feed] = []
     var deliverNotifications: [Bool] = []
@@ -36,6 +39,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         initFeed()
         UNUserNotificationCenter.current().delegate = self
+
+        #if RELEASE // no point in checking for updates if we're not on a release.
+        if Settings.doUpdateCheck {
+            checkForUpdates()
+        }
+        #endif
+    }
+
+    func checkForUpdates() {
+        let task = URLSession.shared.dataTask(with: URL(string: GHAPI_RELEASES_URL)!, completionHandler: { (data, response, error) -> Void in
+            if error == nil {
+                let jsonResponse = data!
+                do {
+                    let releaseData = try JSONDecoder().decode([FailableDecodable<GHRelease>].self, from: jsonResponse).compactMap { $0.base }
+                    self.updateVersion = String((releaseData.first?.tag_name.dropFirst())!) // "v1.2" -> "1.2"
+                } catch { print("taberu's update check failed: " + error.localizedDescription); return }
+            }
+        })
+        task.resume()
     }
 
     func openURL(url: String) {
@@ -69,5 +91,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
         return true
+    }
+}
+
+// https://stackoverflow.com/a/46369152
+struct FailableDecodable<Base : Decodable> : Decodable {
+    let base: Base?
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        self.base = try? container.decode(Base.self)
     }
 }

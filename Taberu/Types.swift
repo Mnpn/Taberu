@@ -37,6 +37,10 @@ class Feed {
     }
 }
 
+struct GHRelease: Decodable {
+    let tag_name: String
+}
+
 enum MiniTitles: Int {
     case nowhere, left, centre, right
 }
@@ -65,6 +69,7 @@ class AppSettings {
 
     var doAutofetch = true
     var autofetchInterval = 60 // minutes
+    var doUpdateCheck = true
 
     var (showFeedTitle, showFeedDesc) = (true, false)
     var (showTitles, showDescs, showDates, showAuthors) = (true, true, true, false)
@@ -94,6 +99,7 @@ class AppSettings {
         shouldHandleHTML = ud.bool(forKey: "should_handle_html")
         showUnreadMarkers = ud.bool(forKey: "should_mark_unread")
         showTooltips = ud.bool(forKey: "should_show_tooltips")
+        doUpdateCheck = ud.bool(forKey: "should_check_updates")
         entryLimit = ud.integer(forKey: "max_feed_entries")
 
         unreadClearing = UnreadClearing(rawValue: ud.integer(forKey: "unread_clearing_option"))!
@@ -120,6 +126,7 @@ class AppSettings {
                 "should_handle_html": shouldHandleHTML,
                 "should_mark_unread": showUnreadMarkers,
                 "should_show_tooltips": showTooltips,
+                "should_check_updates": doUpdateCheck,
                 "unread_clearing_option": unreadClearing.rawValue,
                 "date_time_option": dateTimeOption.rawValue,
                 "wrap_trim_option": wrapTrimOption.rawValue,
