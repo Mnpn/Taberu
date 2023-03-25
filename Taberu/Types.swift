@@ -87,29 +87,7 @@ class AppSettings {
     var maxTextLines = 8
 
     init() {
-        doAutofetch = ud.bool(forKey: "should_autofetch")
-        autofetchInterval = ud.integer(forKey: "autofetch_time")
-
-        showFeedTitle = ud.bool(forKey: "should_display_feed_title")
-        showFeedDesc = ud.bool(forKey: "should_display_feed_description")
-        showTitles = ud.bool(forKey: "should_display_title")
-        showDescs = ud.bool(forKey: "should_display_description")
-        showDates = ud.bool(forKey: "should_display_date")
-        showAuthors = ud.bool(forKey: "should_display_author")
-        shouldHandleHTML = ud.bool(forKey: "should_handle_html")
-        showUnreadMarkers = ud.bool(forKey: "should_mark_unread")
-        showTooltips = ud.bool(forKey: "should_show_tooltips")
-        doUpdateCheck = ud.bool(forKey: "should_check_updates")
-        entryLimit = ud.integer(forKey: "max_feed_entries")
-
-        unreadClearing = UnreadClearing(rawValue: ud.integer(forKey: "unread_clearing_option"))!
-        dateTimeOption = DateTimeVisibility(rawValue: ud.integer(forKey: "date_time_option"))!
-        wrapTrimOption = WrapTrimPreference(rawValue: ud.integer(forKey: "wrap_trim_option"))!
-        miniTitlePosition = MiniTitles(rawValue: ud.integer(forKey: "minititles_position"))!
-    }
-
-    func initUserDefaults() { // set default UserDefaults if they do not exist
-        UserDefaults.standard.register(
+        UserDefaults.standard.register( // set default UserDefaults if they do not exist
             defaults: [
                 "feed_urls": [],
                 "feed_notifications": [],
@@ -133,5 +111,25 @@ class AppSettings {
                 "minititles_position": miniTitlePosition.rawValue
             ]
         )
+
+        doAutofetch = ud.bool(forKey: "should_autofetch")
+        autofetchInterval = ud.integer(forKey: "autofetch_time")
+
+        showFeedTitle = ud.bool(forKey: "should_display_feed_title")
+        showFeedDesc = ud.bool(forKey: "should_display_feed_description")
+        showTitles = ud.bool(forKey: "should_display_title")
+        showDescs = ud.bool(forKey: "should_display_description")
+        showDates = ud.bool(forKey: "should_display_date")
+        showAuthors = ud.bool(forKey: "should_display_author")
+        shouldHandleHTML = ud.bool(forKey: "should_handle_html")
+        showUnreadMarkers = ud.bool(forKey: "should_mark_unread")
+        showTooltips = ud.bool(forKey: "should_show_tooltips")
+        doUpdateCheck = ud.bool(forKey: "should_check_updates")
+        entryLimit = ud.integer(forKey: "max_feed_entries")
+
+        unreadClearing = UnreadClearing(rawValue: ud.integer(forKey: "unread_clearing_option"))!
+        dateTimeOption = DateTimeVisibility(rawValue: ud.integer(forKey: "date_time_option"))!
+        wrapTrimOption = WrapTrimPreference(rawValue: ud.integer(forKey: "wrap_trim_option"))!
+        miniTitlePosition = MiniTitles(rawValue: ud.integer(forKey: "minititles_position"))!
     }
 }

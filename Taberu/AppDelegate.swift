@@ -31,8 +31,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     weak var menuUpdateTimer: Timer?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        Settings.initUserDefaults()
-
         // create a menu bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         updateIcon()
