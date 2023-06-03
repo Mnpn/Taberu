@@ -29,6 +29,7 @@ func buildMainMenu() -> NSMenu {
     mainMenu.addItem(editMenu)
 
     let appMenuContents = NSMenu()
+    appMenuContents.addItem(withTitle: "Close Preferences", action: #selector(NSApplication.shared.keyWindow?.close), keyEquivalent: "w")
     appMenuContents.addItem(withTitle: "Quit Taberu", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
 
     let editMenuContents = NSMenu(title: "Edit")
