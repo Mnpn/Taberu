@@ -35,6 +35,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         updateIcon()
 
+        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(didWake(note:)), name: NSWorkspace.didWakeNotification, object: nil)
+
         initFeed()
         UNUserNotificationCenter.current().delegate = self
 
@@ -71,8 +73,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return storyboard.instantiateInitialController() as? NSWindowController
     }()
 
-    func getTimerRemaining(_ timer: Timer!) -> String {
-        guard timer != nil && timer.isValid else { return "??" }
+    func getTimerRemaining(_ timer: Timer?) -> String {
+        guard let timer = timer, timer.isValid else { return "??" }
         let timeRemaining = timer.fireDate.timeIntervalSinceNow
         if timeRemaining <= 0 { return "00:00" }
         let formatter = DateComponentsFormatter()
@@ -83,6 +85,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         formatter.zeroFormattingBehavior = .pad
         formatter.unitsStyle = .positional
         return formatter.string(from: timeRemaining)!
+    }
+
+    @objc func didWake(note: NSNotification) {
+        guard let timer = autofetchTimer, timer.isValid else { return }
+        timer.fireDate = timer.fireDate // poke the timer. WTF?
+        // if the reload is in the past, it will immediately trigger a reload, which is what we want!
+        // if the reload is in the future, it will correctly count down to that point as if the sleep did not happen.
     }
 
     func applicationWillTerminate(_ aNotification: Notification) { }
