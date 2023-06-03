@@ -78,7 +78,7 @@ extension AppDelegate: NSMenuDelegate {
             hardRefresh.keyEquivalentModifierMask = [.option] //, .command]
 
             menu.addItem(NSMenuItem.separator())
-            menu.addItem(NSMenuItem(title: "Mark all as read", action: #selector(markAllRead), keyEquivalent: "m"))
+            menu.addItem(NSMenuItem(title: "Mark All as Read", action: #selector(markAllRead), keyEquivalent: "m"))
 
             var allFeedEntries: [Entry] = []
             for feed in feeds {
@@ -224,10 +224,8 @@ extension AppDelegate: NSMenuDelegate {
     }
 
     @objc func markAllRead() {
-        for feed in feeds {
-            if feed.active { // only mark as read for active (visible) feeds
-                feed.entries.forEach { $0.unread = false }
-            }
+        for feed in feeds where feed.active { // only mark as read for active (visible) feeds
+            feed.entries.forEach { $0.unread = false }
         }
         hasUnread = false
         createMenu()
