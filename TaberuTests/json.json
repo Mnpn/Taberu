@@ -1,0 +1,23 @@
+{
+    "version": "https://jsonfeed.org/version/1.1",
+    "title": "Example JSON Feed",
+    "home_page_url": "https://mnpn.dev/",
+    "feed_url": "https://mnpn.dev/feed.json",
+    "description": "A test feed for Taberu.",
+    "items": [
+        {
+            "title": "Second",
+            "id": "https://mnpn.dev/second",
+            "url": "https://mnpn.dev/second",
+            "content_text": "This is a second entry.",
+            "date_published": "2023-09-20T12:05:24Z"
+        },
+        {
+            "title": "First",
+            "id": "https://mnpn.dev/first",
+            "url": "https://mnpn.dev/first",
+            "content_html": "<strong>This is a first entry.</strong>",
+            "date_published": "2023-09-20T12:05:24Z"
+        },
+    ]
+}

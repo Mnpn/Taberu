@@ -13,6 +13,11 @@
 		172A0C33285CA3150042A7AE /* PreferencesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A0C32285CA3150042A7AE /* PreferencesWindowController.swift */; };
 		1774423629378D1100606BB8 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1774423529378D1100606BB8 /* main.swift */; };
 		177B90BE2ABC30D100CBF937 /* Updates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177B90BD2ABC30D100CBF937 /* Updates.swift */; };
+		177B90C62ABC34E900CBF937 /* TaberuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177B90C52ABC34E900CBF937 /* TaberuTests.swift */; };
+		177B90CD2ABC380B00CBF937 /* FeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177B90CC2ABC380B00CBF937 /* FeedTests.swift */; };
+		177B90CF2ABC393500CBF937 /* rss.xml in Resources */ = {isa = PBXBuildFile; fileRef = 177B90CE2ABC393500CBF937 /* rss.xml */; };
+		177B90D12ABC466800CBF937 /* atom.xml in Resources */ = {isa = PBXBuildFile; fileRef = 177B90D02ABC466800CBF937 /* atom.xml */; };
+		177B90D32ABC472E00CBF937 /* json.json in Resources */ = {isa = PBXBuildFile; fileRef = 177B90D22ABC472E00CBF937 /* json.json */; };
 		179574C6298329BB00C0D531 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179574C5298329BB00C0D531 /* Types.swift */; };
 		179574C8298329C600C0D531 /* Feed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179574C7298329C600C0D531 /* Feed.swift */; };
 		179574CA29832A4500C0D531 /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179574C929832A4500C0D531 /* Menu.swift */; };
@@ -22,6 +27,16 @@
 		17C15048285BF9C300910754 /* FeedKit in Frameworks */ = {isa = PBXBuildFile; productRef = 17C15047285BF9C300910754 /* FeedKit */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		177B90C72ABC34E900CBF937 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 17C1502C285BF99700910754 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 17C15033285BF99700910754;
+			remoteInfo = Taberu;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		170A22BD299818C400983206 /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		172A0C28285C99A00042A7AE /* Preferences.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Preferences.storyboard; sourceTree = "<group>"; };
@@ -29,6 +44,12 @@
 		172A0C32285CA3150042A7AE /* PreferencesWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindowController.swift; sourceTree = "<group>"; };
 		1774423529378D1100606BB8 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = main.swift; path = Taberu/main.swift; sourceTree = "<group>"; };
 		177B90BD2ABC30D100CBF937 /* Updates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Updates.swift; sourceTree = "<group>"; };
+		177B90C32ABC34E900CBF937 /* TaberuTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TaberuTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		177B90C52ABC34E900CBF937 /* TaberuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaberuTests.swift; sourceTree = "<group>"; };
+		177B90CC2ABC380B00CBF937 /* FeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedTests.swift; sourceTree = "<group>"; };
+		177B90CE2ABC393500CBF937 /* rss.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = rss.xml; sourceTree = "<group>"; };
+		177B90D02ABC466800CBF937 /* atom.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = atom.xml; sourceTree = "<group>"; };
+		177B90D22ABC472E00CBF937 /* json.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = json.json; sourceTree = "<group>"; };
 		179574C5298329BB00C0D531 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		179574C7298329C600C0D531 /* Feed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feed.swift; sourceTree = "<group>"; };
 		179574C929832A4500C0D531 /* Menu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Menu.swift; sourceTree = "<group>"; };
@@ -40,6 +61,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		177B90C02ABC34E900CBF937 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		17C15031285BF99700910754 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -61,11 +89,24 @@
 			path = PreferencesWindow;
 			sourceTree = "<group>";
 		};
+		177B90C42ABC34E900CBF937 /* TaberuTests */ = {
+			isa = PBXGroup;
+			children = (
+				177B90CE2ABC393500CBF937 /* rss.xml */,
+				177B90C52ABC34E900CBF937 /* TaberuTests.swift */,
+				177B90CC2ABC380B00CBF937 /* FeedTests.swift */,
+				177B90D02ABC466800CBF937 /* atom.xml */,
+				177B90D22ABC472E00CBF937 /* json.json */,
+			);
+			path = TaberuTests;
+			sourceTree = "<group>";
+		};
 		17C1502B285BF99700910754 = {
 			isa = PBXGroup;
 			children = (
 				1774423529378D1100606BB8 /* main.swift */,
 				17C15036285BF99700910754 /* Taberu */,
+				177B90C42ABC34E900CBF937 /* TaberuTests */,
 				17C15035285BF99700910754 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -74,6 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				17C15034285BF99700910754 /* Taberu.app */,
+				177B90C32ABC34E900CBF937 /* TaberuTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -98,6 +140,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		177B90C22ABC34E900CBF937 /* TaberuTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 177B90C92ABC34E900CBF937 /* Build configuration list for PBXNativeTarget "TaberuTests" */;
+			buildPhases = (
+				177B90BF2ABC34E900CBF937 /* Sources */,
+				177B90C02ABC34E900CBF937 /* Frameworks */,
+				177B90C12ABC34E900CBF937 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				177B90C82ABC34E900CBF937 /* PBXTargetDependency */,
+			);
+			name = TaberuTests;
+			productName = TaberuTests;
+			productReference = 177B90C32ABC34E900CBF937 /* TaberuTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		17C15033285BF99700910754 /* Taberu */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 17C15043285BF99900910754 /* Build configuration list for PBXNativeTarget "Taberu" */;
@@ -125,9 +185,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1340;
+				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1410;
 				TargetAttributes = {
+					177B90C22ABC34E900CBF937 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = 17C15033285BF99700910754;
+					};
 					17C15033285BF99700910754 = {
 						CreatedOnToolsVersion = 13.4.1;
 					};
@@ -150,11 +214,22 @@
 			projectRoot = "";
 			targets = (
 				17C15033285BF99700910754 /* Taberu */,
+				177B90C22ABC34E900CBF937 /* TaberuTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		177B90C12ABC34E900CBF937 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				177B90D32ABC472E00CBF937 /* json.json in Resources */,
+				177B90D12ABC466800CBF937 /* atom.xml in Resources */,
+				177B90CF2ABC393500CBF937 /* rss.xml in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		17C15032285BF99700910754 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -167,6 +242,15 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		177B90BF2ABC34E900CBF937 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				177B90C62ABC34E900CBF937 /* TaberuTests.swift in Sources */,
+				177B90CD2ABC380B00CBF937 /* FeedTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		17C15030285BF99700910754 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -186,7 +270,68 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		177B90C82ABC34E900CBF937 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 17C15033285BF99700910754 /* Taberu */;
+			targetProxy = 177B90C72ABC34E900CBF937 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		177B90CA2ABC34E900CBF937 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 35BSP6SUG9;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.mnpn.TaberuTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Taberu.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Taberu";
+			};
+			name = Debug;
+		};
+		177B90CB2ABC34E900CBF937 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 35BSP6SUG9;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.mnpn.TaberuTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Taberu.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Taberu";
+			};
+			name = Release;
+		};
 		17C15041285BF99900910754 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -309,9 +454,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Taberu/Taberu.entitlements;
 				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 63;
+				CURRENT_PROJECT_VERSION = 64;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 35BSP6SUG9;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -342,9 +488,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Taberu/Taberu.entitlements;
 				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 63;
+				CURRENT_PROJECT_VERSION = 64;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 35BSP6SUG9;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -372,6 +519,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		177B90C92ABC34E900CBF937 /* Build configuration list for PBXNativeTarget "TaberuTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				177B90CA2ABC34E900CBF937 /* Debug */,
+				177B90CB2ABC34E900CBF937 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		17C1502F285BF99700910754 /* Build configuration list for PBXProject "Taberu" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -59,7 +59,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func getTimerRemaining(_ timer: Timer?) -> String {
         guard let timer = timer, timer.isValid else { return "??" }
-        let timeRemaining = timer.fireDate.timeIntervalSinceNow
+        let timeRemaining = timer.fireDate.timeIntervalSinceNow.rounded()
         if timeRemaining <= 0 { return "00:00" }
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.minute, .second]

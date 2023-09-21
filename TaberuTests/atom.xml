@@ -1,0 +1,18 @@
+<!-- This file is used to verify that Taberu can parse correctly. -->
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>Example Atom Feed</title>
+    <link href="https://mnpn.dev/" />
+    <subtitle>A test feed for Taberu.</subtitle>
+    <entry>
+        <title>Second</title>
+        <link href="https://mnpn.dev/second" />
+        <summary>This is a second entry.</summary>
+        <updated>2023-09-20T12:05:24Z</updated>
+    </entry>
+    <entry>
+        <title>First</title>
+        <link href="https://mnpn.dev/first" />
+        <summary>This is a first entry.</summary>
+        <published>2023-09-18T23:55:28Z</published>
+    </entry>
+</feed>

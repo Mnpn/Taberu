@@ -54,7 +54,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     /* user has clicked a notification */
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void ) {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         // alternatively we make this receive the entry's ID and look for that and get the URL
 
         if !response.notification.request.content.userInfo.isEmpty { // there are entries to read

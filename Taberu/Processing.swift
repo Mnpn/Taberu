@@ -37,14 +37,14 @@ extension AppDelegate {
 extension String? {
     // https://stackoverflow.com/q/25983558
     public func removeHTML(fancy: Bool) -> String? {
-        guard let string = self?.data(using: String.Encoding.utf8) else { return self } // nils are also caught here
+        guard let string = self?.data(using: String.Encoding.unicode) else { return self } // nils are also caught here
         if(fancy) { // this actually launches a webkit process, not very efficient, but is more accurate than regex.
             let options: [NSAttributedString.DocumentReadingOptionKey : Any] = [
                 .documentType: NSAttributedString.DocumentType.html,
                 .characterEncoding: String.Encoding.utf8.rawValue
             ]
             let attr = try? NSAttributedString(data: string, options: options, documentAttributes: nil)
-            return attr?.string
+            return attr?.string.replacingOccurrences(of: "\u{2028}", with: "\n").trimmingCharacters(in: .whitespacesAndNewlines) //
         }
         return self?.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
     }

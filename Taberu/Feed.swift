@@ -21,7 +21,7 @@ extension AppDelegate {
 
         for (i, feed) in feeds.enumerated() {
             if (feed.url.absoluteString != "" && setURLs != lastURLs) || syncOverride {
-                fetch(url: feed.url, forFeed: i)
+                feeds[i] = fetch(url: feed.url) ?? feeds[i]
             }
         }
         lastURLs = setURLs
@@ -72,18 +72,18 @@ extension AppDelegate {
         }
     }
 
-    func fetch(url: URL, forFeed: Int) {
-        guard !url.absoluteString.isEmpty else { return } // don't fetch empty strings
+    func fetch(url: URL) -> Feed? {
         userfacingError = "" // clear previous fetch errors
         let parser = FeedParser(URL: url)
         let result = parser.parse()
+        let newFeed = Feed(url: url, active: true, notify: false)
         switch result {
         case .success(let feed):
-            var finalFeed: [RSSFeedItem] = [] // JSON & Atom feeds will also be stores as RSS items
+            var finalFeedItems: [RSSFeedItem] = [] // JSON & Atom feeds will also be stored as RSS items
             switch feed {
             case let .atom(feed):
-                feeds[forFeed].name = feed.title ?? "Unknown Atom feed title"
-                feeds[forFeed].desc = feed.subtitle?.value ?? "This Atom feed does not have a description"
+                newFeed.name = feed.title ?? "Unknown Atom feed title"
+                newFeed.desc = feed.subtitle?.value ?? "This Atom feed does not have a description"
                 for ai in feed.entries ?? [] {
                     let rssFI = RSSFeedItem.init()
                     rssFI.title = ai.title
@@ -91,18 +91,18 @@ extension AppDelegate {
                     rssFI.pubDate = ai.updated ?? ai.published
                     rssFI.author = ai.authors?.first?.name
                     rssFI.link = ai.links?.first?.attributes?.href
-                    finalFeed.append(rssFI)
+                    finalFeedItems.append(rssFI)
                 }
             case let .rss(feed):
-                feeds[forFeed].name = feed.title ?? "Unknown RSS feed title"
-                feeds[forFeed].desc = feed.description ?? "This RSS feed does not have a description"
+                newFeed.name = feed.title ?? "Unknown RSS feed title"
+                newFeed.desc = feed.description ?? "This RSS feed does not have a description"
                 for ri in feed.items ?? [] {
                     ri.pubDate = ri.dublinCore?.dcDate ?? ri.pubDate
-                    finalFeed.append(ri)
+                    finalFeedItems.append(ri)
                 }
             case let .json(feed):
-                feeds[forFeed].name = feed.title ?? "Unknown JSON feed title"
-                feeds[forFeed].desc = feed.description ?? "This JSON feed does not have a description"
+                newFeed.name = feed.title ?? "Unknown JSON feed title"
+                newFeed.desc = feed.description ?? "This JSON feed does not have a description"
                 for ji in feed.items ?? [] {
                     let rssFI = RSSFeedItem.init()
                     rssFI.title = ji.title
@@ -110,11 +110,11 @@ extension AppDelegate {
                     rssFI.pubDate = ji.dateModified ?? ji.datePublished
                     rssFI.author = ji.author?.name
                     rssFI.link = ji.url
-                    finalFeed.append(rssFI)
+                    finalFeedItems.append(rssFI)
                 }
             }
 
-            for (i, ae) in finalFeed.enumerated() {
+            for (i, ae) in finalFeedItems.enumerated() {
                 if Settings.shouldHandleHTML {
                     // don't spend too much time in webkit by only using it for visible entries, and throw (much faster)
                     // regex on everything else (in case the user edits maxEntries but we don't refresh)
@@ -122,23 +122,25 @@ extension AppDelegate {
                     ae.description = ae.description.removeHTML(fancy: i < Settings.entryLimit)
                 }
                 // only add new items to the feed..
-                if !feeds[forFeed].entries.contains(where: { ae == $0.item }) {
+                if !newFeed.entries.contains(where: { ae == $0.item }) {
                     hasUnread = true
-                    feeds[forFeed].entries.append(Entry(item: ae, parent: feeds[forFeed], id: entryID))
+                    newFeed.entries.append(Entry(item: ae, parent: newFeed, id: entryID))
                     entryID += 1
                 }
             }
 
             // ..but let's make sure to delete anything which is no longer present
-            for entry in feeds[forFeed].entries {
-                if !finalFeed.contains(where: { entry.item == $0 }) {
-                    feeds[forFeed].entries.removeAll(where: { entry.item == $0.item })
+            for entry in newFeed.entries {
+                if !finalFeedItems.contains(where: { entry.item == $0 }) {
+                    newFeed.entries.removeAll(where: { entry.item == $0.item })
                 }
             }
+            return newFeed
 
         case .failure(let error):
             print(error)
             userfacingError = error.localizedDescription
         }
+        return nil
     }
 }
