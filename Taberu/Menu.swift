@@ -13,11 +13,7 @@ extension AppDelegate: NSMenuDelegate {
         let menu = NSMenu()
         menu.delegate = self
 
-        if updateVersion != nil && updateVersion != Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String {
-            let updateNotice = NSMenuItem(title: "PH", action: #selector(entryClick), keyEquivalent: "")
-            updateNotice.attributedTitle = NSAttributedString(string: "A new update is available (\(updateVersion!)), click to view & dismiss this notice.")
-            updateNotice.title = RELEASE_URL + updateVersion!
-            updateNotice.identifier = NSUserInterfaceItemIdentifier("menu-update-notice")
+        if let updateNotice = createUpdateNotice() {
             menu.addItem(updateNotice)
             menu.addItem(NSMenuItem.separator())
         }

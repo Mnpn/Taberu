@@ -12,6 +12,7 @@
 		172A0C31285CA2600042A7AE /* PreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A0C30285CA2600042A7AE /* PreferencesViewController.swift */; };
 		172A0C33285CA3150042A7AE /* PreferencesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A0C32285CA3150042A7AE /* PreferencesWindowController.swift */; };
 		1774423629378D1100606BB8 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1774423529378D1100606BB8 /* main.swift */; };
+		177B90BE2ABC30D100CBF937 /* Updates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177B90BD2ABC30D100CBF937 /* Updates.swift */; };
 		179574C6298329BB00C0D531 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179574C5298329BB00C0D531 /* Types.swift */; };
 		179574C8298329C600C0D531 /* Feed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179574C7298329C600C0D531 /* Feed.swift */; };
 		179574CA29832A4500C0D531 /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179574C929832A4500C0D531 /* Menu.swift */; };
@@ -27,6 +28,7 @@
 		172A0C30285CA2600042A7AE /* PreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesViewController.swift; sourceTree = "<group>"; };
 		172A0C32285CA3150042A7AE /* PreferencesWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindowController.swift; sourceTree = "<group>"; };
 		1774423529378D1100606BB8 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = main.swift; path = Taberu/main.swift; sourceTree = "<group>"; };
+		177B90BD2ABC30D100CBF937 /* Updates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Updates.swift; sourceTree = "<group>"; };
 		179574C5298329BB00C0D531 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		179574C7298329C600C0D531 /* Feed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feed.swift; sourceTree = "<group>"; };
 		179574C929832A4500C0D531 /* Menu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Menu.swift; sourceTree = "<group>"; };
@@ -88,6 +90,7 @@
 				179574C7298329C600C0D531 /* Feed.swift */,
 				17C1503B285BF99900910754 /* Assets.xcassets */,
 				17C15040285BF99900910754 /* Taberu.entitlements */,
+				177B90BD2ABC30D100CBF937 /* Updates.swift */,
 			);
 			path = Taberu;
 			sourceTree = "<group>";
@@ -172,6 +175,7 @@
 				17C15038285BF99700910754 /* AppDelegate.swift in Sources */,
 				179574C8298329C600C0D531 /* Feed.swift in Sources */,
 				170A22BE299818C400983206 /* Notifications.swift in Sources */,
+				177B90BE2ABC30D100CBF937 /* Updates.swift in Sources */,
 				179574CA29832A4500C0D531 /* Menu.swift in Sources */,
 				172A0C33285CA3150042A7AE /* PreferencesWindowController.swift in Sources */,
 				1774423629378D1100606BB8 /* main.swift in Sources */,
@@ -307,7 +311,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 62;
+				CURRENT_PROJECT_VERSION = 63;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 35BSP6SUG9;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -340,7 +344,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 62;
+				CURRENT_PROJECT_VERSION = 63;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 35BSP6SUG9;
 				ENABLE_HARDENED_RUNTIME = YES;
