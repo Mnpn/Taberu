@@ -189,7 +189,7 @@ extension AppDelegate: NSMenuDelegate {
             menu.addItem(nonDisplayedEntries)
         }
 
-        if let markAllAsRead = menu.item(withTitle: "Mark all as read") {
+        if let markAllAsRead = menu.item(withTitle: "Mark All as Read") {
             let shouldShowMarkAllAsRead = Settings.showUnreadMarkers && Settings.unreadClearing == .click && hasUnread
             markAllAsRead.isHidden = !shouldShowMarkAllAsRead
             menu.item(at: menu.index(of: markAllAsRead) - 1)?.isHidden = !shouldShowMarkAllAsRead

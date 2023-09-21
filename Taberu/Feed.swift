@@ -10,20 +10,35 @@ import FeedKit
 import Foundation
 
 extension AppDelegate {
+    func updateMenuItemTitle(item: NSMenuItem, newTitle: String) { // WTF?
+        // the app occasionally died when the title was updated while the menu was open
+        // running on the main thread helped with this. that's fair enough.
+        // but obviously (/s) this needs to be a function because otherwise it goes
+        // "Capture of 'refreshNotice' with non-sendable type 'NSMenuItem' in a `@Sendable` closure"
+        DispatchQueue.main.async {
+            item.title = newTitle
+        }
+    }
+
     // reload() is async to not delay other actions such as closing preferences
     func reload(syncOverride: Bool) async {
         updateIcon(icon: "tray.and.arrow.down.fill")
 
         let menu = NSMenu()
-        menu.addItem(NSMenuItem(title: "Refreshing, please wait..", action: nil, keyEquivalent: ""))
+        var refreshNotice = NSMenuItem(title: "Refreshing, please wait.. (0/\(feeds.count))", action: nil, keyEquivalent: "")
+        menu.addItem(refreshNotice)
         appendMenuBottom(menu: menu)
         statusItem.menu = menu
 
         for (i, feed) in feeds.enumerated() {
             if (feed.url.absoluteString != "" && setURLs != lastURLs) || syncOverride {
-                feeds[i] = fetch(url: feed.url) ?? feeds[i]
+                let newTitle = "Refreshing, please wait.. (\(i + 1)/\(feeds.count))"
+                updateMenuItemTitle(item: refreshNotice, newTitle: newTitle)
+                feeds[i] = fetch(url: feed.url, currentData: feeds[i]) ?? feeds[i]
             }
         }
+        statusItem.menu?.cancelTracking() // this closes the menu. not ideal, but changing an entire menu while it is active rarely leads to happy results.
+
         lastURLs = setURLs
         createMenu() // refresh the menu
         updateIcon()
@@ -72,11 +87,11 @@ extension AppDelegate {
         }
     }
 
-    func fetch(url: URL) -> Feed? {
+    func fetch(url: URL, currentData: Feed? = nil) -> Feed? {
         userfacingError = "" // clear previous fetch errors
         let parser = FeedParser(URL: url)
         let result = parser.parse()
-        let newFeed = Feed(url: url, active: true, notify: false)
+        let newFeed = currentData ?? Feed(url: url, active: true, notify: false)
         switch result {
         case .success(let feed):
             var finalFeedItems: [RSSFeedItem] = [] // JSON & Atom feeds will also be stored as RSS items
