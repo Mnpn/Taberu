@@ -45,7 +45,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func openURL(url: String) {
-        NSWorkspace.shared.open(URL(string: url)!)
+        NSWorkspace.shared.open(URL(string: (URLComponents(string: url)?.string)!)!) // URLComponents makes things percentage-encoded, otherwise we risk a crash
     }
 
     @objc func openPreferences() {

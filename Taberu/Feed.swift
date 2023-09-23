@@ -25,7 +25,7 @@ extension AppDelegate {
         updateIcon(icon: "tray.and.arrow.down.fill")
 
         let menu = NSMenu()
-        var refreshNotice = NSMenuItem(title: "Refreshing, please wait.. (0/\(feeds.count))", action: nil, keyEquivalent: "")
+        let refreshNotice = NSMenuItem(title: "Refreshing, please wait.. (0/\(feeds.count))", action: nil, keyEquivalent: "")
         menu.addItem(refreshNotice)
         appendMenuBottom(menu: menu)
         statusItem.menu = menu
@@ -87,18 +87,17 @@ extension AppDelegate {
         }
     }
 
-    func fetch(url: URL, currentData: Feed? = nil) -> Feed? {
+    func fetch(url: URL, currentData: Feed) -> Feed? {
         userfacingError = "" // clear previous fetch errors
         let parser = FeedParser(URL: url)
         let result = parser.parse()
-        let newFeed = currentData ?? Feed(url: url, active: true, notify: false)
         switch result {
         case .success(let feed):
             var finalFeedItems: [RSSFeedItem] = [] // JSON & Atom feeds will also be stored as RSS items
             switch feed {
             case let .atom(feed):
-                newFeed.name = feed.title ?? "Unknown Atom feed title"
-                newFeed.desc = feed.subtitle?.value ?? "This Atom feed does not have a description"
+                currentData.name = feed.title ?? "Unknown Atom feed title"
+                currentData.desc = feed.subtitle?.value ?? "This Atom feed does not have a description"
                 for ai in feed.entries ?? [] {
                     let rssFI = RSSFeedItem.init()
                     rssFI.title = ai.title
@@ -109,15 +108,15 @@ extension AppDelegate {
                     finalFeedItems.append(rssFI)
                 }
             case let .rss(feed):
-                newFeed.name = feed.title ?? "Unknown RSS feed title"
-                newFeed.desc = feed.description ?? "This RSS feed does not have a description"
+                currentData.name = feed.title ?? "Unknown RSS feed title"
+                currentData.desc = feed.description ?? "This RSS feed does not have a description"
                 for ri in feed.items ?? [] {
                     ri.pubDate = ri.dublinCore?.dcDate ?? ri.pubDate
                     finalFeedItems.append(ri)
                 }
             case let .json(feed):
-                newFeed.name = feed.title ?? "Unknown JSON feed title"
-                newFeed.desc = feed.description ?? "This JSON feed does not have a description"
+                currentData.name = feed.title ?? "Unknown JSON feed title"
+                currentData.desc = feed.description ?? "This JSON feed does not have a description"
                 for ji in feed.items ?? [] {
                     let rssFI = RSSFeedItem.init()
                     rssFI.title = ji.title
@@ -137,20 +136,20 @@ extension AppDelegate {
                     ae.description = ae.description.removeHTML(fancy: i < Settings.entryLimit)
                 }
                 // only add new items to the feed..
-                if !newFeed.entries.contains(where: { ae == $0.item }) {
+                if !currentData.entries.contains(where: { ae == $0.item }) {
                     hasUnread = true
-                    newFeed.entries.append(Entry(item: ae, parent: newFeed, id: entryID))
+                    currentData.entries.append(Entry(item: ae, parent: currentData, id: entryID))
                     entryID += 1
                 }
             }
 
             // ..but let's make sure to delete anything which is no longer present
-            for entry in newFeed.entries {
+            for entry in currentData.entries {
                 if !finalFeedItems.contains(where: { entry.item == $0 }) {
-                    newFeed.entries.removeAll(where: { entry.item == $0.item })
+                    currentData.entries.removeAll(where: { entry.item == $0.item })
                 }
             }
-            return newFeed
+            return currentData
 
         case .failure(let error):
             print(error)
