@@ -26,12 +26,12 @@ final class FeedTests: XCTestCase {
                 XCTAssert(false, "The \(feed.0) test file could not be located.")
                 return
             }
-            let rssFeed = appDelegate.fetch(url: URL(fileURLWithPath: path))
+            let rssFeed = appDelegate.fetch(data: Feed(url: URL(fileURLWithPath: path)))
             XCTAssertNotNil(rssFeed?.entries[0].item.title, "Title is not present")
             XCTAssertTrue(rssFeed?.entries.count == 2, "Incorrect entry count")
         }
         // bad parameters / non-existent resource
-        XCTAssertNil(appDelegate.fetch(url: URL(fileURLWithPath: "")), "Did not disregard a lacking URL")
+        XCTAssertNil(appDelegate.fetch(data: Feed(url: URL(fileURLWithPath: ""))), "Did not disregard a lacking URL")
     }
 
     func testHTMLRemoving() throws {

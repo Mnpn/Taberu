@@ -30,7 +30,7 @@ class Feed {
     var name = "Unknown feed name"
     var desc = "Unknown feed description"
 
-    init(url: URL, active: Bool, notify: Bool) {
+    init(url: URL, active: Bool = true, notify: Bool = false) {
         self.url = url
         self.active = active
         self.notify = notify

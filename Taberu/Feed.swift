@@ -34,7 +34,7 @@ extension AppDelegate {
             if (feed.url.absoluteString != "" && setURLs != lastURLs) || syncOverride {
                 let newTitle = "Refreshing, please wait.. (\(i + 1)/\(feeds.count))"
                 updateMenuItemTitle(item: refreshNotice, newTitle: newTitle)
-                feeds[i] = fetch(url: feed.url, currentData: feeds[i]) ?? feeds[i]
+                feeds[i] = fetch(data: feed) ?? feed
             }
         }
         statusItem.menu?.cancelTracking() // this closes the menu. not ideal, but changing an entire menu while it is active rarely leads to happy results.
@@ -87,17 +87,17 @@ extension AppDelegate {
         }
     }
 
-    func fetch(url: URL, currentData: Feed) -> Feed? {
+    func fetch(data: Feed) -> Feed? {
         userfacingError = "" // clear previous fetch errors
-        let parser = FeedParser(URL: url)
+        let parser = FeedParser(URL: data.url)
         let result = parser.parse()
         switch result {
         case .success(let feed):
             var finalFeedItems: [RSSFeedItem] = [] // JSON & Atom feeds will also be stored as RSS items
             switch feed {
             case let .atom(feed):
-                currentData.name = feed.title ?? "Unknown Atom feed title"
-                currentData.desc = feed.subtitle?.value ?? "This Atom feed does not have a description"
+                data.name = feed.title ?? "Unknown Atom feed title"
+                data.desc = feed.subtitle?.value ?? "This Atom feed does not have a description"
                 for ai in feed.entries ?? [] {
                     let rssFI = RSSFeedItem.init()
                     rssFI.title = ai.title
@@ -108,15 +108,15 @@ extension AppDelegate {
                     finalFeedItems.append(rssFI)
                 }
             case let .rss(feed):
-                currentData.name = feed.title ?? "Unknown RSS feed title"
-                currentData.desc = feed.description ?? "This RSS feed does not have a description"
+                data.name = feed.title ?? "Unknown RSS feed title"
+                data.desc = feed.description ?? "This RSS feed does not have a description"
                 for ri in feed.items ?? [] {
                     ri.pubDate = ri.dublinCore?.dcDate ?? ri.pubDate
                     finalFeedItems.append(ri)
                 }
             case let .json(feed):
-                currentData.name = feed.title ?? "Unknown JSON feed title"
-                currentData.desc = feed.description ?? "This JSON feed does not have a description"
+                data.name = feed.title ?? "Unknown JSON feed title"
+                data.desc = feed.description ?? "This JSON feed does not have a description"
                 for ji in feed.items ?? [] {
                     let rssFI = RSSFeedItem.init()
                     rssFI.title = ji.title
@@ -136,20 +136,20 @@ extension AppDelegate {
                     ae.description = ae.description.removeHTML(fancy: i < Settings.entryLimit)
                 }
                 // only add new items to the feed..
-                if !currentData.entries.contains(where: { ae == $0.item }) {
+                if !data.entries.contains(where: { ae == $0.item }) {
                     hasUnread = true
-                    currentData.entries.append(Entry(item: ae, parent: currentData, id: entryID))
+                    data.entries.append(Entry(item: ae, parent: data, id: entryID))
                     entryID += 1
                 }
             }
 
             // ..but let's make sure to delete anything which is no longer present
-            for entry in currentData.entries {
+            for entry in data.entries {
                 if !finalFeedItems.contains(where: { entry.item == $0 }) {
-                    currentData.entries.removeAll(where: { entry.item == $0.item })
+                    data.entries.removeAll(where: { entry.item == $0.item })
                 }
             }
-            return currentData
+            return data
 
         case .failure(let error):
             print(error)
