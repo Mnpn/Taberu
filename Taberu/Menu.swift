@@ -172,6 +172,8 @@ extension AppDelegate: NSMenuDelegate {
 
                 if Settings.showTitles || showDesc || showDate || Settings.showAuthors {
                     entryItem.attributedTitle = attrstring
+                    entryItem.setAccessibilityLabel(attrstring.string.replacingOccurrences(of: "●", with: ". Unread entry.")) // otherwise e.g. VoiceOver reads the title (which in this case is the entry URL)
+
                     // store the link in the title (attr overrides the content), this lets us fetch it on click events later
                     entryItem.title = String(entry.item.link ?? "")
                     menu.addItem(entryItem)
